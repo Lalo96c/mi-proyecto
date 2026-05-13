@@ -5,7 +5,7 @@ import { ModalScaffold } from '../../components/ModalScaffold';
 import type { ApiDeviceRepair, DeviceRepairPayload, ApiTechnician, RepairImage } from '../../types/deviceRepair';
 import type { ApiClient } from '../../types/client';
 import { techniciansService, imageRepairService } from '../../api';
-import { getPublicUrlAsync } from '../../api/config';
+import { getPublicUrlAsync, getPublicUrl } from '../../api/config';
 import { v4 as uuidv4 } from 'uuid';
 import QRCodeStyling from 'qr-code-styling';
 
@@ -126,8 +126,10 @@ export function DeviceRepairFormModal({
   const qrRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Actualizar formulario cuando cambien initialRepair o el modo
+  // Actualizar formulario cuando cambien initialRepair, el modo o se abra el modal
   useEffect(() => {
+    if (!open) return;
+
     if (mode === 'edit' && initialRepair) {
       setForm(formFromRepair(initialRepair));
       
@@ -141,7 +143,7 @@ export function DeviceRepairFormModal({
       setForm(emptyForm());
       setEditImages([]);
     }
-  }, [initialRepair, mode]);
+  }, [initialRepair, mode, open]);
 
   useEffect(() => {
     if (open && mode === 'edit') {
@@ -172,7 +174,7 @@ export function DeviceRepairFormModal({
 
     const fetchImages = async () => {
       try {
-        const backendUrl = getPublicUrl();
+        const backendUrl = await getPublicUrlAsync();
         const response = await fetch(`${backendUrl}/api/images-repair/${repairUUID}`);
         if (response.ok) {
           const data = await response.json();
@@ -315,7 +317,9 @@ export function DeviceRepairFormModal({
     
     try {
       const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
-      const response = await fetch(`${apiUrl}/images-repair/${initialRepair.id}/${imageName}`, {
+      // URL-encode el nombre del archivo para caracteres especiales
+      const encodedFileName = encodeURIComponent(imageName);
+      const response = await fetch(`${apiUrl}/images-repair/${initialRepair.id}/${encodedFileName}`, {
         method: 'DELETE',
       });
       

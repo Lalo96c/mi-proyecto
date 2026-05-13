@@ -10,375 +10,493 @@
             padding: 0;
             box-sizing: border-box;
         }
+
         body {
-            font-family: 'Arial', sans-serif;
-            background-color: #f5f5f5;
-            padding: 20px;
+            font-family: 'Segoe UI', 'Arial', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            padding: 30px 20px;
         }
+
         .container {
-            max-width: 800px;
+            width: min(100%, 900px);
             margin: 0 auto;
-            background: white;
-            padding: 40px;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            background: #fff;
+            padding: 30px;
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
         }
-        .header {
-            text-align: center;
-            border-bottom: 3px solid #667eea;
+
+        .ticket-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+            border-bottom: 3px solid #2563eb;
             padding-bottom: 20px;
             margin-bottom: 30px;
-        }
-        .header h1 {
-            color: #667eea;
-            font-size: 28px;
-            margin-bottom: 5px;
-        }
-        .header p {
-            color: #666;
-            font-size: 14px;
-        }
-        .qr-section {
-            display: flex;
-            justify-content: center;
-            margin-bottom: 30px;
+            background: linear-gradient(90deg, #f0f7ff 0%, transparent 100%);
             padding: 20px;
-            background: #f9f9f9;
             border-radius: 8px;
         }
-        .qr-section img {
-            width: 150px;
-            height: 150px;
-            border: 2px solid #667eea;
-            padding: 5px;
-            background: white;
+
+        .ticket-title {
+            font-size: 24px;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: #2563eb;
+            line-height: 1.2;
         }
-        .repair-info {
+
+        .ticket-meta {
+            text-align: right;
+            font-size: 13px;
+            color: #475569;
+        }
+
+        .ticket-meta strong {
+            display: block;
+            color: #1e40af;
+            margin-bottom: 6px;
+            font-weight: 700;
+        }
+
+        .section {
+            margin-bottom: 25px;
+        }
+
+        .details-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 30px;
-            margin-bottom: 30px;
+            gap: 20px;
+            margin-top: 0;
         }
-        .info-block {
-            border-left: 4px solid #667eea;
-            padding-left: 15px;
+
+        .detail-card,
+        .total-card {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 18px;
+            font-size: 13px;
+            line-height: 1.6;
         }
-        .info-block h3 {
-            color: #333;
+
+        .detail-card:hover {
+            border-color: #2563eb;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.1);
+        }
+
+        .detail-card strong,
+        .total-card strong {
+            display: block;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: #2563eb;
+            margin-bottom: 8px;
+            font-weight: 700;
+        }
+
+        .detail-card p,
+        .total-card p {
+            margin: 0 0 12px 0;
+            color: #1e293b;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .small-note {
+            font-size: 12px;
+            color: #475569;
+            line-height: 1.7;
+            border-left: 4px solid #f59e0b;
+            padding: 16px 20px;
+            background: #fffbeb;
+            border-radius: 8px;
+            margin-top: 25px;
+            display: none;
+        }
+
+        .signature {
+            margin-top: 30px;
+            padding-top: 25px;
+            border-top: 2px solid #e2e8f0;
+            font-size: 13px;
+            color: #475569;
+            display: none;
+        }
+
+        .signature-line {
+            margin-top: 18px;
+            border-top: 1px dashed #333;
+            width: 100%;
+        }
+
+        .ticket-qr {
+            width: 120px;
+            height: 120px;
+            border: 2px solid #e2e8f0;
+            padding: 8px;
+            background: #fff;
+            object-fit: contain;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .actions {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 12px;
+            margin-top: 30px;
+        }
+
+        .btn {
+            flex: 1 1 auto;
+            min-width: 120px;
+            padding: 12px 16px;
+            border: none;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            color: #fff;
+            background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(37, 99, 235, 0.3);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #64748b 0%, #475569 100%);
+        }
+
+        .btn-secondary:hover {
+            box-shadow: 0 6px 20px rgba(100, 116, 139, 0.3);
+        }
+
+        .totals-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .total-card {
+            text-align: center;
+            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+            border-color: #93c5fd;
+        }
+
+        .total-card strong {
+            color: #0c4a6e;
+        }
+
+        .total-card p {
+            color: #075985;
+            font-size: 16px;
+        }
+
+        .images-section {
+            margin-bottom: 25px;
+            margin-top: 25px;
+        }
+
+        .images-section strong {
+            display: block;
             font-size: 12px;
             text-transform: uppercase;
-            color: #667eea;
-            margin-bottom: 8px;
-            font-weight: bold;
-        }
-        .info-block p {
-            color: #333;
-            font-size: 14px;
-            margin-bottom: 5px;
-        }
-        .info-block .value {
-            font-size: 16px;
-            font-weight: bold;
-            color: #333;
-        }
-        .client-info {
-            background: #f0f4ff;
-            padding: 20px;
-            border-radius: 8px;
-            margin-bottom: 30px;
-            border-left: 4px solid #667eea;
-        }
-        .client-info h2 {
-            color: #667eea;
-            font-size: 14px;
-            text-transform: uppercase;
-            margin-bottom: 12px;
-        }
-        .client-info p {
-            color: #333;
-            font-size: 14px;
-            margin-bottom: 5px;
-        }
-        .device-section {
-            background: #f9f9f9;
-            padding: 20px;
-            border-radius: 8px;
-            margin-bottom: 30px;
-        }
-        .device-section h3 {
-            color: #667eea;
-            font-size: 14px;
-            text-transform: uppercase;
-            margin-bottom: 12px;
-            border-bottom: 2px solid #667eea;
-            padding-bottom: 8px;
-        }
-        .device-section p {
-            color: #333;
-            font-size: 14px;
-            line-height: 1.6;
-            margin-bottom: 8px;
-        }
-        .images-section {
-            margin-bottom: 30px;
-        }
-        .images-section h3 {
-            color: #667eea;
-            font-size: 14px;
-            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: #2563eb;
             margin-bottom: 15px;
-            border-bottom: 2px solid #667eea;
-            padding-bottom: 8px;
+            font-weight: 700;
         }
+
         .images-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-            gap: 10px;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-top: 15px;
         }
+
         .image-item {
-            width: 100%;
-            aspect-ratio: 1;
-            border-radius: 6px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
             overflow: hidden;
-            border: 2px solid #ddd;
+            min-height: 120px;
+            transition: all 0.3s;
         }
+
+        .image-item:hover {
+            border-color: #2563eb;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.1);
+        }
+
         .image-item img {
             width: 100%;
             height: 100%;
             object-fit: cover;
+            display: block;
         }
+
         .no-images {
-            color: #999;
-            font-style: italic;
-            padding: 15px;
-            text-align: center;
-            background: #f5f5f5;
+            font-size: 12px;
+            color: #666;
+            padding: 10px;
+            background: #f8f8f8;
             border-radius: 6px;
-        }
-        .cost-section {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 25px;
-            border-radius: 8px;
-            margin-bottom: 30px;
-            text-align: right;
-        }
-        .cost-section p {
-            font-size: 12px;
-            margin-bottom: 8px;
-            opacity: 0.9;
-        }
-        .cost-section .amount {
-            font-size: 36px;
-            font-weight: bold;
-            margin-bottom: 5px;
-        }
-        .status-badge {
-            display: inline-block;
-            padding: 6px 14px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: bold;
-            text-transform: uppercase;
-        }
-        .status-recibido {
-            background: #e3f2fd;
-            color: #1976d2;
-        }
-        .status-en_reparacion {
-            background: #fff3e0;
-            color: #f57c00;
-        }
-        .status-reparado {
-            background: #e8f5e9;
-            color: #388e3c;
-        }
-        .status-entregado {
-            background: #f3e5f5;
-            color: #7b1fa2;
-        }
-        .footer {
             text-align: center;
-            padding-top: 20px;
-            border-top: 1px solid #ddd;
-            color: #999;
-            font-size: 12px;
         }
-        .actions {
-            text-align: center;
-            margin-top: 30px;
-            padding-top: 20px;
-            border-top: 1px solid #ddd;
-        }
-        .btn {
-            display: inline-block;
-            padding: 10px 20px;
-            margin: 5px;
-            background: #667eea;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 14px;
-            text-decoration: none;
-            transition: background 0.3s;
-        }
-        .btn:hover {
-            background: #5568d3;
-        }
-        .btn-secondary {
-            background: #6c757d;
-        }
-        .btn-secondary:hover {
-            background: #5a6268;
-        }
+
         @media print {
-            body {
+            @page {
+                size: 210mm 99mm;
+                margin: 0;
+            }
+
+            html, body {
+                width: 210mm;
+                height: 99mm;
                 background: white;
                 padding: 0;
+                margin: 0;
+                overflow: hidden;
             }
+
             .container {
                 box-shadow: none;
-                padding: 0;
+                border: none;
+                padding: 8px;
+                width: 100%;
+                max-width: 100%;
             }
+
             .actions {
                 display: none;
             }
-            .btn {
-                display: none;
+
+            .ticket-header {
+                border-bottom: 1px solid #333;
+                margin-bottom: 6px;
+                display: flex;
+                justify-content: space-between;
+                align-items: flex-start;
             }
-        }
-        @media (max-width: 600px) {
-            .container {
-                padding: 20px;
+
+            .ticket-header div {
+                flex: 1;
             }
-            .repair-info {
-                grid-template-columns: 1fr;
-                gap: 20px;
+
+            .ticket-title {
+                font-size: 14px;
+                margin-bottom: 2px;
             }
-            .cost-section {
+
+            .ticket-meta {
+                font-size: 8px;
+                line-height: 1.2;
+            }
+
+            .ticket-meta strong {
+                font-size: 8px;
+                display: inline;
+            }
+
+            .section {
+                margin-bottom: 6px;
+            }
+
+            .details-grid {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 8px;
+            }
+
+            .detail-card,
+            .total-card {
+                padding: 4px;
+                font-size: 8px;
+                background: transparent;
+                border: none;
+            }
+
+            .detail-card strong,
+            .total-card strong {
+                font-size: 7px;
+                margin-bottom: 2px;
+                display: block;
+            }
+
+            .detail-card p,
+            .total-card p {
+                font-size: 8px;
+                margin: 0;
+            }
+
+            .small-note {
+                font-size: 7px;
+                margin-bottom: 4px;
+                padding-top: 4px;
+                border-top: 1px dashed #ccc;
+                line-height: 1.3;
+            }
+
+            .signature {
+                margin-top: 6px;
+                padding-top: 4px;
+                border-top: 1px solid #ccc;
+                font-size: 8px;
+            }
+
+            .signature-line {
+                margin-top: 6px;
+                border-top: 1px dashed #333;
+                height: 0;
+            }
+
+            .ticket-qr {
+                width: 50px;
+                height: 50px;
+                border: 1px solid #333;
+            }
+
+            .totals-row {
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 6px;
+            }
+
+            .totals-row .total-card {
                 text-align: center;
             }
-            .header h1 {
-                font-size: 20px;
+
+            .images-section,
+            .print-hide {
+                display: none !important;
+            }
+
+            .small-note,
+            .signature {
+                display: block !important;
+            }
+        }
+
+        @media (max-width: 420px) {
+            .ticket-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .details-grid {
+                grid-template-columns: 1fr;
             }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <!-- Header -->
-        <div class="header">
-            <h1>Comprobante de Reparación</h1>
-            <p>Código: <strong>{{ $repair->repair_code }}</strong></p>
+        <div class="ticket-header">
+            <div>
+                <div class="ticket-title">Nota de Reparación</div>
+                <div class="ticket-meta">
+                    <strong>Folio: {{ $repair->repair_code }}</strong>
+                    Fecha: {{ $repair->created_at->format('d/m/Y H:i') }}
+                </div>
+            </div>
+            <img id="qr-image" class="ticket-qr" src="" alt="QR Code">
         </div>
 
-        <!-- QR Code -->
-        <div class="qr-section">
-            <img id="qr-image" src="" alt="QR Code" style="width: 150px; height: 150px; border: 2px solid #667eea; padding: 5px;">
-        </div>
-
-        <!-- Info General -->
-        <div class="repair-info">
-            <div class="info-block">
-                <h3>Código de Reparación</h3>
-                <p class="value">{{ $repair->repair_code }}</p>
-            </div>
-            <div class="info-block">
-                <h3>Estado</h3>
-                <p>
-                    <span class="status-badge status-{{ $repair->status }}">
-                        {{ ucfirst(str_replace('_', ' ', $repair->status)) }}
-                    </span>
-                </p>
-            </div>
-            <div class="info-block">
-                <h3>Fecha de Registro</h3>
-                <p class="value">{{ $repair->created_at->format('d/m/Y H:i') }}</p>
-            </div>
-            <div class="info-block">
-                <h3>Técnico Asignado</h3>
-                <p class="value">
-                    {{ $repair->technician ? $repair->technician->name : 'Sin asignar' }}
-                </p>
+        <div class="section">
+            <div class="details-grid">
+                <div class="detail-card">
+                    <strong>Dispositivo</strong>
+                    <p>{{ $repair->device_description ?? 'N/A' }}</p>
+                </div>
+                <div class="detail-card">
+                    <strong>Falla reportada</strong>
+                    <p>{{ $repair->fault_description ?? 'Sin información' }}</p>
+                </div>
             </div>
         </div>
 
-        <!-- Cliente -->
-        <div class="client-info">
-            <h2>Información del Cliente</h2>
-            @if($repair->client)
-                <p><strong>Nombre:</strong> {{ $repair->client->first_name }} {{ $repair->client->last_name }}</p>
-                <p><strong>Teléfono:</strong> {{ $repair->client->phone ?? 'N/A' }}</p>
-                <p><strong>DNI:</strong> {{ $repair->client->dni ?? 'N/A' }}</p>
-            @else
-                <p>Cliente no disponible</p>
-            @endif
+        <div class="section">
+            <div class="details-grid">
+                <div class="detail-card">
+                    <strong>Cliente</strong>
+                    <p>{{ optional($repair->client)->first_name ?? '---' }} {{ optional($repair->client)->last_name ?? '' }}</p>
+                    <strong>Tel</strong>
+                    <p>{{ optional($repair->client)->phone ?? 'N/A' }}</p>
+                    <strong>DNI</strong>
+                    <p>{{ optional($repair->client)->dni ?? 'N/A' }}</p>
+                </div>
+                <div class="detail-card">
+                    <strong>Observaciones</strong>
+                    <p>{{ $repair->repair_notes ?: 'Sin observaciones' }}</p>
+                </div>
+            </div>
         </div>
 
-        <!-- Dispositivo y Falla -->
-        <div class="device-section">
-            <h3>Detalles del Dispositivo</h3>
-            <p><strong>Dispositivo:</strong> {{ $repair->device_description }}</p>
-            <p><strong>Falla Reportada:</strong> {{ $repair->fault_description }}</p>
-            @if($repair->repair_notes)
-                <p><strong>Notas:</strong> {{ $repair->repair_notes }}</p>
-            @endif
+        <div class="section">
+            <div class="totals-row">
+                <div class="total-card">
+                    <strong>Anticipo</strong>
+                    <p>S/ {{ number_format($repair->advance_amount ?? 0, 2, '.', ',') }}</p>
+                </div>
+                <div class="total-card">
+                    <strong>Restante</strong>
+                    <p>S/ {{ number_format(max(($repair->total_amount ?? 0) - ($repair->advance_amount ?? 0), 0), 2, '.', ',') }}</p>
+                </div>
+                <div class="total-card">
+                    <strong>Total estimado</strong>
+                    <p>S/ {{ number_format($repair->total_amount ?? 0, 2, '.', ',') }}</p>
+                </div>
+            </div>
         </div>
 
-        <!-- Imágenes -->
         @if($repair->images && count($repair->images) > 0)
             <div class="images-section">
-                <h3>Imágenes de la Reparación</h3>
+                <strong>Imágenes</strong>
                 <div class="images-grid">
                     @foreach($repair->images as $image)
                         <div class="image-item">
-                            <img src="{{ $image['url'] }}" alt="{{ $image['name'] }}" loading="lazy">
+                            <img src="{{ $image['url'] }}" alt="{{ $image['name'] }}">
                         </div>
                     @endforeach
                 </div>
             </div>
-        @else
-            <div class="images-section">
-                <h3>Imágenes de la Reparación</h3>
-                <div class="no-images">No hay imágenes disponibles</div>
-            </div>
         @endif
 
-        <!-- Costo -->
-        <div class="cost-section">
-            <p>Costo Total de la Reparación</p>
-            <div class="amount">
-                S/ {{ number_format($repair->total_amount, 2, '.', ',') }}
-            </div>
+        <div class="section small-note">
+            <p>Guarde este ticket como comprobante. El equipo queda bajo custodia del taller. No nos hacemos responsables por información no respaldada. El diagnóstico y la reparación se realizan con autorización del cliente.</p>
         </div>
 
-        <!-- Footer -->
-        <div class="footer">
-            <p>Este comprobante fue generado el {{ now()->format('d/m/Y H:i:s') }}</p>
-            <p>Para consultas, contacta al soporte técnico.</p>
+        <div class="signature">
+            Firma del cliente
+            <div class="signature-line"></div>
         </div>
 
-        <!-- Acciones -->
         <div class="actions">
-            <button class="btn" onclick="window.print()">📄 Imprimir</button>
-            <button class="btn btn-secondary" onclick="downloadQR()">📥 Descargar QR</button>
-            <button class="btn btn-secondary" onclick="window.history.back()">← Volver</button>
+            <button class="btn" onclick="window.print()">Imprimir</button>
+            <button class="btn btn-secondary" onclick="downloadQR()">Descargar QR</button>
+            <button class="btn btn-secondary" onclick="window.history.back()">Volver</button>
         </div>
     </div>
 
     <script>
-        // Generar QR usando API de servidor QR confiable
         document.addEventListener('DOMContentLoaded', function() {
             const qrImageUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=' + encodeURIComponent(window.location.href);
             const qrImage = document.getElementById('qr-image');
             if (qrImage) {
                 qrImage.src = qrImageUrl;
-                qrImage.style.display = 'block';
             }
         });
 
-        // Descargar QR
         window.downloadQR = function() {
             const link = document.createElement('a');
             link.href = 'https://api.qrserver.com/v1/create-qr-code/?size=500x500&data=' + encodeURIComponent(window.location.href);

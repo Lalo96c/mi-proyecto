@@ -272,4 +272,57 @@ class ImageRepairController extends Controller
             ], 500)->header('Content-Type', 'application/json');
         }
     }
+
+    /**
+     * Eliminar toda la carpeta de imágenes de una reparación
+     * Usado cuando se cancela la creación de una reparación
+     *
+     * @param string $repairId
+     * @return JsonResponse
+     */
+    public function destroyRepairFolder(string $repairId): JsonResponse
+    {
+        try {
+            $disk = Storage::disk('public');
+            $repairPath = "repairs/{$repairId}";
+
+            if (!$disk->exists($repairPath)) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'La carpeta no existe o ya fue eliminada',
+                ]);
+            }
+
+            // Eliminar todos los archivos de la carpeta
+            $files = $disk->files($repairPath);
+            foreach ($files as $file) {
+                $disk->delete($file);
+                \Log::info("Imagen eliminada", ['file' => $file]);
+            }
+
+            // Eliminar la carpeta
+            $disk->deleteDirectory($repairPath);
+
+            \Log::info("Carpeta de reparación eliminada", [
+                'repairId' => $repairId,
+                'repairPath' => $repairPath,
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Carpeta de reparación eliminada exitosamente',
+            ]);
+
+        } catch (\Exception $e) {
+            \Log::error("Error eliminando carpeta de reparación", [
+                'repairId' => $repairId,
+                'error' => $e->getMessage(),
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al eliminar la carpeta: ' . $e->getMessage(),
+            ], 500)->header('Content-Type', 'application/json');
+        }
+    }
 }

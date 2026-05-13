@@ -415,7 +415,8 @@
 
             try {
                 const baseUrl = window.location.origin;
-                const response = await fetch(`${baseUrl}/images-repair/${repairId}/${fileName}`, {
+                const encodedFileName = encodeURIComponent(fileName);
+                const response = await fetch(`${baseUrl}/images-repair/${repairId}/${encodedFileName}`, {
                     method: 'DELETE',
                     headers: {
                         'X-CSRF-TOKEN': '{{ csrf_token() }}',

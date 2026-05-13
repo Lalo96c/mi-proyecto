@@ -65,16 +65,18 @@ export function PurchaseFormModal({
   submitting,
   apiErrors,
 }: Props) {
+  if (!open) return null;
+
   const [form, setForm] = useState<PurchaseFormState>(emptyForm());
 
-  // Actualizar formulario cuando cambien initialPurchase o el modo
+  // Actualizar formulario cuando cambien initialPurchase, el modo o se abra el modal
   useEffect(() => {
     if (mode === 'edit' && initialPurchase) {
       setForm(formFromPurchase(initialPurchase));
     } else if (mode === 'create') {
       setForm(emptyForm());
     }
-  }, [initialPurchase, mode]);
+  }, [initialPurchase, mode, open]);
 
   function setLine(i: number, patch: Partial<PurchaseLineForm>) {
     setForm((f) => {
