@@ -10,12 +10,20 @@ export async function fetchProducts(params: {
   page?: number;
   per_page?: number;
   search?: string;
+  name?: string;
+  code?: string;
+  category?: string;
+  status?: string;
 } = {}): Promise<PaginatedProductsResponse> {
   const { data } = await httpClient.get<PaginatedProductsResponse>('/products', {
     params: {
       page: params.page ?? 1,
       per_page: params.per_page ?? 15,
-      search: params.search,
+      search: params.search || undefined,
+      name: params.name || undefined,
+      code: params.code || undefined,
+      category: params.category || undefined,
+      status: params.status || undefined,
     },
   });
   return data;

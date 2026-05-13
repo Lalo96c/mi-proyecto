@@ -56,7 +56,7 @@ export type LaravelPaginationMeta = {
   current_page: number;
   from: number | null;
   last_page: number;
-  path: string;
+  path?: string;
   per_page: number;
   to: number | null;
   total: number;

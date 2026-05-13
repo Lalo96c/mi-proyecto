@@ -8,6 +8,8 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Attributes\Scope;
+use Illuminate\Database\Eloquent\Builder;
 
 /**
  * @property int $id
@@ -26,6 +28,10 @@ class Sale extends Model
         'sale_date',
         'client_id',
         'total_amount',
+    ];
+
+    protected $filterable = [
+        'sale_code',
     ];
 
     /**
@@ -53,5 +59,35 @@ class Sale extends Model
     public function saleDetails(): HasMany
     {
         return $this->hasMany(SaleDetail::class);
+    }
+
+    #[Scope]
+    protected function filter(Builder $query, array $filters): void
+    {
+        foreach ($filters as $field => $value) {
+            if (in_array($field, $this->filterable) && filled($value)) {
+                $query->where($field, 'LIKE', "%{$value}%");
+            }
+        }
+    }
+
+    #[Scope]
+    protected function filterByDateRange(Builder $query, ?string $dateFrom, ?string $dateTo): void
+    {
+        if (filled($dateFrom)) {
+            $query->whereDate('sale_date', '>=', $dateFrom);
+        }
+
+        if (filled($dateTo)) {
+            $query->whereDate('sale_date', '<=', $dateTo);
+        }
+    }
+
+    #[Scope]
+    protected function filterByClient(Builder $query, ?int $clientId): void
+    {
+        if (filled($clientId)) {
+            $query->where('client_id', $clientId);
+        }
     }
 }

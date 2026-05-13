@@ -1,7 +1,10 @@
 export { HomePage } from './HomePage';
 export { HomeDashboard } from './home/HomeDashboard';
+export { InventoryMovementsPage } from './inventory-movements/InventoryMovementsPage';
 export { ProductosPage } from './products/ProductosPage';
 export { ModulePlaceholderPage } from './modules/ModulePlaceholder';
 export { VentasPage } from './sales/VentasPage';
-export { CategoriasPage, SoportePage } from './placeholderModules';
+export { ComprasPage } from './purchases/ComprasPage';
+export { CategoriasPage } from './placeholderModules';
+export { SoportePage } from './technical-support/SoportePage';
 export { ClientesPage } from './clients/ClientesPage';

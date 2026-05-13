@@ -1,7 +1,9 @@
 import { useState, type FormEvent } from 'react';
 import { ClientSearchSelect } from '../../components/ClientSearchSelect';
+import { QuickClientForm } from '../../components/QuickClientForm';
 import { ModalScaffold } from '../../components/ModalScaffold';
 import type { ApiSale, SalePayload } from '../../types/sale';
+import type { ApiClient } from '../../types/client';
 import { ProductSearchSelect } from '../../components/ProductSearchSelect';
 
 type LineForm = {
@@ -72,6 +74,8 @@ function SaleFormModalBody({
     return emptyForm();
   });
 
+  const [showQuickClientForm, setShowQuickClientForm] = useState(false);
+
   function setLine(i: number, patch: Partial<LineForm>) {
     setForm((f) => {
       const lines = f.lines.map((line, j) => (j === i ? { ...line, ...patch } : line));
@@ -114,6 +118,12 @@ function SaleFormModalBody({
       details,
     };
     await onSubmit(payload);
+  }
+
+  // Manejar cliente creado en el formulario rápido
+  function handleClientCreated(newClient: ApiClient) {
+    setForm({ ...form, client_id: newClient.id });
+    setShowQuickClientForm(false);
   }
 
   return (
@@ -167,12 +177,27 @@ function SaleFormModalBody({
                 />
               </div>
               <div>
-                <ClientSearchSelect
-                  id="sale-client"
-                  label="Cliente"
-                  value={form.client_id}
-                  onChange={(clientId) => setForm((f) => ({ ...f, client_id: clientId }))}
-                />
+                <label className="block text-sm font-medium text-slate-700 mb-2">
+                  Cliente
+                </label>
+                <div className="flex gap-2">
+                  <div className="flex-1">
+                    <ClientSearchSelect
+                      id="sale-client"
+                      label=""
+                      value={form.client_id}
+                      onChange={(clientId) => setForm((f) => ({ ...f, client_id: clientId }))}
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setShowQuickClientForm(true)}
+                    className="rounded-lg border border-indigo-300 bg-indigo-50 px-3 py-2 text-sm font-medium text-indigo-700 hover:bg-indigo-100 whitespace-nowrap transition-colors h-10"
+                    title="Crear nuevo cliente sin salir del formulario"
+                  >
+                    ➕ Crear cliente
+                  </button>
+                </div>
               </div>
             </div>
 
@@ -268,6 +293,13 @@ function SaleFormModalBody({
           </div>
         </form>
       </div>
+
+      {/* Formulario rápido para crear cliente */}
+      <QuickClientForm
+        open={showQuickClientForm}
+        onClose={() => setShowQuickClientForm(false)}
+        onClientCreated={handleClientCreated}
+      />
     </ModalScaffold>
   );
 }

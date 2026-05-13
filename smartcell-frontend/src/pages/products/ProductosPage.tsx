@@ -16,7 +16,7 @@ import type {
   ProductPayload,
   ProductTableRow,
 } from '../../types/product';
-import { PRODUCT_STATUS } from '../../types/product';
+import { PRODUCT_STATUS, PRODUCT_STATUS_LABELS } from '../../types/product';
 import { ProductFormModal } from './ProductFormModal';
 import { StockBadge } from './StockBadge';
 
@@ -42,6 +42,14 @@ export function ProductosPage() {
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string[] | null>(null);
 
+  // Filtros
+  const [filters, setFilters] = useState({
+    name: '',
+    code: '',
+    category: '',
+    status: '',
+  });
+
   const [modalOpen, setModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState<'create' | 'edit'>('create');
   const [editingProduct, setEditingProduct] = useState<ApiProduct | null>(null);
@@ -52,7 +60,14 @@ export function ProductosPage() {
     setLoading(true);
     setLoadError(null);
     try {
-      const res = await fetchProducts({ page: p, per_page: 15 });
+      const res = await fetchProducts({ 
+        page: p, 
+        per_page: 15,
+        name: filters.name,
+        code: filters.code,
+        category: filters.category,
+        status: filters.status,
+      });
       setRows((res.data ?? []).map(mapProductRow));
       setMeta(res.meta ?? null);
     } catch (e) {
@@ -62,11 +77,21 @@ export function ProductosPage() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [filters]);
 
   useEffect(() => {
     loadProducts(page);
   }, [page, loadProducts]);
+
+  function handleFilterChange(field: keyof typeof filters, value: string) {
+    setFilters(prev => ({ ...prev, [field]: value }));
+    setPage(1); // Reset a la página 1 cuando cambia el filtro
+  }
+
+  function handleClearFilters() {
+    setFilters({ name: '', code: '', category: '', status: '' });
+    setPage(1);
+  }
 
   const sinStockEnPagina = rows.filter(
     (r) => r.estado === PRODUCT_STATUS.SIN_STOCK || r.cantidad === 0,
@@ -196,6 +221,74 @@ export function ProductosPage() {
 
       <div className="flex-1 p-6 sm:p-8">
         <div className="mx-auto max-w-6xl space-y-6">
+          {/* Filtros */}
+          <div className="grid gap-4 rounded-xl border border-slate-200/70 bg-white p-4 shadow-sm shadow-slate-900/5 md:grid-cols-4">
+            <div>
+              <label className="block text-xs font-medium text-slate-700 mb-1">
+                Nombre
+              </label>
+              <input
+                type="text"
+                placeholder="Buscar por nombre..."
+                value={filters.name}
+                onChange={(e) => handleFilterChange('name', e.target.value)}
+                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm placeholder-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-slate-700 mb-1">
+                Código
+              </label>
+              <input
+                type="text"
+                placeholder="Buscar por código..."
+                value={filters.code}
+                onChange={(e) => handleFilterChange('code', e.target.value)}
+                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm placeholder-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-slate-700 mb-1">
+                Categoría
+              </label>
+              <input
+                type="text"
+                placeholder="Buscar por categoría..."
+                value={filters.category}
+                onChange={(e) => handleFilterChange('category', e.target.value)}
+                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm placeholder-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-slate-700 mb-1">
+                Estado
+              </label>
+              <select
+                value={filters.status}
+                onChange={(e) => handleFilterChange('status', e.target.value)}
+                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+              >
+                <option value="">Todos</option>
+                {Object.entries(PRODUCT_STATUS_LABELS).map(([value, label]) => (
+                  <option key={value} value={value}>
+                    {label}
+                  </option>
+                ))}
+              </select>
+            </div>
+            {Object.values(filters).some(v => v) && (
+              <div className="md:col-span-4 flex justify-end">
+                <button
+                  type="button"
+                  onClick={handleClearFilters}
+                  className="inline-flex items-center rounded-lg bg-slate-100 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-200"
+                >
+                  Limpiar filtros
+                </button>
+              </div>
+            )}
+          </div>
+
           {loadError?.length ? (
             <div className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-900">
               <p className="font-medium">No se pudo cargar el listado</p>
@@ -240,7 +333,7 @@ export function ProductosPage() {
             <DataTable columns={columns} rows={rows} caption="Listado de productos" />
           )}
 
-          {meta && meta.last_page > 1 ? (
+          {meta && meta.last_page >= 1 ? (
             <div className="flex flex-wrap items-center justify-between gap-3 border-t border-slate-200/80 pt-4">
               <p className="text-sm text-slate-600">
                 Mostrando {meta.from ?? 0}–{meta.to ?? 0} de {meta.total}

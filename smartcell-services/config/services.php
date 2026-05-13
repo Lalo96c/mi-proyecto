@@ -35,4 +35,8 @@ return [
         ],
     ],
 
+    'reniec' => [
+        'token' => env('RENIEC_TOKEN'),
+    ],
+
 ];

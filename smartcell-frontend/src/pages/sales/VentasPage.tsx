@@ -9,10 +9,11 @@ import {
 import { DataTable } from '../../components/DataTable';
 import type { Column } from '../../components/DataTable';
 import { PageHeader } from '../../components/layout/PageHeader';
-import type { ApiProduct, LaravelPaginationMeta } from '../../types/product';
-import type { ApiClient, ApiSale, SalePayload, SaleTableRow } from '../../types/sale';
+import type { LaravelPaginationMeta } from '../../types/product';
+import type { ApiSale, SalePayload, SaleTableRow } from '../../types/sale';
 import { clientDisplayName } from '../../types/sale';
 import { formatCurrency } from '../../utils/format';
+import { ClientSearchSelect } from '../../components/ClientSearchSelect';
 import { SaleDetailModal } from './SaleDetailModal';
 import { SaleFormModal } from './SaleFormModal';
 
@@ -40,6 +41,14 @@ export function VentasPage() {
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string[] | null>(null);
 
+  // Filtros
+  const [filters, setFilters] = useState({
+    sale_code: '',
+    date_from: '',
+    date_to: '',
+    client_id: null as number | null,
+  });
+
   const [modalOpen, setModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState<'create' | 'edit'>('create');
   const [editingSale, setEditingSale] = useState<ApiSale | null>(null);
@@ -54,7 +63,14 @@ export function VentasPage() {
     setLoading(true);
     setLoadError(null);
     try {
-      const res = await fetchSales({ page: p, per_page: 15 });
+      const res = await fetchSales({ 
+        page: p, 
+        per_page: 15,
+        sale_code: filters.sale_code,
+        date_from: filters.date_from,
+        date_to: filters.date_to,
+        client_id: filters.client_id,
+      });
       setRows((res.data ?? []).map(mapSaleRow));
       setMeta(res.meta ?? null);
     } catch (e) {
@@ -64,12 +80,22 @@ export function VentasPage() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [filters]);
 
 
   useEffect(() => {
     loadSales(page);
   }, [page, loadSales]);
+
+  function handleFilterChange(field: keyof typeof filters, value: string) {
+    setFilters(prev => ({ ...prev, [field]: value }));
+    setPage(1); // Reset a la página 1 cuando cambia el filtro
+  }
+
+  function handleClearFilters() {
+    setFilters({ sale_code: '', date_from: '', date_to: '', client_id: null });
+    setPage(1);
+  }
 
   const multiPage = meta && meta.last_page > 1;
 
@@ -114,7 +140,14 @@ export function VentasPage() {
     if (!window.confirm(`¿Eliminar la venta «${row.codigo}»?`)) return;
     try {
       await deleteSale(row.id);
-      const res = await fetchSales({ page, per_page: 15 });
+      const res = await fetchSales({ 
+        page, 
+        per_page: 15,
+        sale_code: filters.sale_code,
+        date_from: filters.date_from,
+        date_to: filters.date_to,
+        client_id: filters.client_id,
+      });
       if ((res.data?.length ?? 0) === 0 && page > 1) {
         setPage((p) => p - 1);
       } else {
@@ -197,6 +230,65 @@ export function VentasPage() {
       <div className="flex-1 p-6 sm:p-8">
         <div className="mx-auto max-w-6xl space-y-6">
 
+          {/* Filtros */}
+          <div className="grid gap-4 rounded-xl border border-slate-200/70 bg-white p-4 shadow-sm shadow-slate-900/5 md:grid-cols-4">
+            <div>
+              <label className="block text-xs font-medium text-slate-700 mb-1">
+                Código de venta
+              </label>
+              <input
+                type="text"
+                placeholder="Buscar por código..."
+                value={filters.sale_code}
+                onChange={(e) => handleFilterChange('sale_code', e.target.value)}
+                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm placeholder-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-slate-700 mb-1">
+                Desde
+              </label>
+              <input
+                type="date"
+                value={filters.date_from}
+                onChange={(e) => handleFilterChange('date_from', e.target.value)}
+                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-slate-700 mb-1">
+                Hasta
+              </label>
+              <input
+                type="date"
+                value={filters.date_to}
+                onChange={(e) => handleFilterChange('date_to', e.target.value)}
+                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+              />
+            </div>
+            <div>
+              <ClientSearchSelect
+                id="filter-client"
+                label="Cliente"
+                value={filters.client_id}
+                onChange={(clientId) => {
+                  setFilters(prev => ({ ...prev, client_id: clientId }));
+                  setPage(1);
+                }}
+              />
+            </div>
+            {Object.values(filters).some(v => v) && (
+              <div className="md:col-span-4 flex justify-end">
+                <button
+                  type="button"
+                  onClick={handleClearFilters}
+                  className="inline-flex items-center rounded-lg bg-slate-100 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-200"
+                >
+                  Limpiar filtros
+                </button>
+              </div>
+            )}
+          </div>
 
           {loadError?.length ? (
             <div className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-900">
@@ -233,7 +325,7 @@ export function VentasPage() {
             <DataTable columns={columns} rows={rows} caption="Listado de ventas" />
           )}
 
-          {meta && meta.last_page > 1 ? (
+          {meta && meta.last_page >= 1 ? (
             <div className="flex flex-wrap items-center justify-between gap-3 border-t border-slate-200/80 pt-4">
               <p className="text-sm text-slate-600">
                 Mostrando {meta.from ?? 0}–{meta.to ?? 0} de {meta.total}

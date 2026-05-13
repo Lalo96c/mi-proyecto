@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreProductRequest;
 use App\Http\Requests\UpdateProductRequest;
 use App\Http\Resources\ProductResource;
+use App\Models\InventoryMovement;
 use App\Models\Product;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -18,16 +19,22 @@ class ProductController extends Controller
         $perPage = max(1, min($perPage, 100));
 
         $search = $request->query('search');
+        
+        $filters = [
+            'name' => $request->query('name'),
+            'code' => $request->query('code'),
+            'category' => $request->query('category'),
+            'status' => $request->query('status'),
+        ];
 
         $query = Product::query();
-
-        // 🔥 BUSCADOR
+        
+        // Si hay búsqueda, usarla con OR en los 3 campos
         if ($search) {
-            $query->where(function ($q) use ($search) {
-                $q->where('name', 'like', "%$search%")
-                    ->orWhere('code', 'like', "%$search%")
-                    ->orWhere('category', 'like', "%$search%");
-            });
+            $query->search($search);
+        } else {
+            // Si no, usar los filtros individuales con AND
+            $query->filter($filters);
         }
 
         $products = $query
@@ -44,6 +51,16 @@ class ProductController extends Controller
     public function store(StoreProductRequest $request): JsonResponse
     {
         $product = Product::query()->create($request->validated());
+
+        // Create initial stock movement if quantity > 0
+        if ($product->quantity > 0) {
+            InventoryMovement::create([
+                'product_id' => $product->id,
+                'type' => InventoryMovement::TYPE_ENTRADA,
+                'quantity' => $product->quantity,
+                'reason' => InventoryMovement::REASON_STOCK_INICIAL,
+            ]);
+        }
 
         return (new ProductResource($product))
             ->response()

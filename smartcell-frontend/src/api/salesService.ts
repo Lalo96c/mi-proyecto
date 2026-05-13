@@ -5,11 +5,19 @@ import { httpClient } from './httpClient';
 export async function fetchSales(params: {
   page?: number;
   per_page?: number;
+  sale_code?: string;
+  date_from?: string;
+  date_to?: string;
+  client_id?: number | null;
 } = {}): Promise<PaginatedSalesResponse> {
   const { data } = await httpClient.get<PaginatedSalesResponse>('/sales', {
     params: {
       page: params.page ?? 1,
       per_page: params.per_page ?? 15,
+      sale_code: params.sale_code || undefined,
+      date_from: params.date_from || undefined,
+      date_to: params.date_to || undefined,
+      client_id: params.client_id || undefined,
     },
   });
   return data;

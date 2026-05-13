@@ -7,9 +7,11 @@ import {
   ClientesPage,
   HomeDashboard,
   HomePage,
+  InventoryMovementsPage,
   ProductosPage,
   SoportePage,
   VentasPage,
+  ComprasPage,
 } from './pages';
 import type { ReactNode } from 'react';
 
@@ -46,10 +48,26 @@ export default function App() {
                 }
               />
               <Route
+                path="compras"
+                element={
+                  <ProtectedRoute>
+                    <ComprasPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
                 path="clientes"
                 element={
                   <ProtectedRoute>
                     <ClientesPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="inventory-movements"
+                element={
+                  <ProtectedRoute>
+                    <InventoryMovementsPage />
                   </ProtectedRoute>
                 }
               />

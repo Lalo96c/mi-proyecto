@@ -4,6 +4,7 @@ export type ApiClient = {
   dni: string;
   first_name: string;
   last_name: string;
+  phone?: string | null;
   created_at?: string;
   updated_at?: string;
 };
@@ -13,6 +14,7 @@ export type ClientTableRow = {
   id: number;
   dni: string;
   nombre: string;
+  phone?: string | null;
   _raw: ApiClient;
 };
 
@@ -21,6 +23,7 @@ export type ClientPayload = {
   dni: string;
   first_name: string;
   last_name: string;
+  phone?: string;
 };
 
 // Paginación estilo Laravel
@@ -28,7 +31,7 @@ export type LaravelPaginationMeta = {
   current_page: number;
   from: number | null;
   last_page: number;
-  path: string;
+  path?: string;
   per_page: number;
   to: number | null;
   total: number;

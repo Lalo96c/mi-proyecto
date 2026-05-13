@@ -1,0 +1,278 @@
+import { ModalScaffold } from '../../components/ModalScaffold';
+import { formatCurrency } from '../../utils/format';
+import type { ApiDeviceRepair, RepairImage } from '../../types/deviceRepair';
+import { clientDisplayName, technicianDisplayName, statusLabel } from '../../types/deviceRepair';
+import { useState, useEffect } from 'react';
+
+type DeviceRepairDetailModalProps = {
+  open: boolean;
+  repair: ApiDeviceRepair | null;
+  onClose: () => void;
+};
+
+export function DeviceRepairDetailModal({ open, repair, onClose }: DeviceRepairDetailModalProps) {
+  const [selectedImageUrl, setSelectedImageUrl] = useState<string | null>(null);
+  const [images, setImages] = useState<RepairImage[]>([]);
+  const [loadingImages, setLoadingImages] = useState(false);
+  const [showQRModal, setShowQRModal] = useState(false);
+
+  // Cargar imágenes desde la API cuando se abre el modal
+  useEffect(() => {
+    if (!open || !repair) {
+      setImages([]);
+      return;
+    }
+
+    // Si la reparación ya tiene imágenes, usarlas
+    if (repair.images && repair.images.length > 0) {
+      console.log('Usando imágenes de repair.images:', repair.images);
+      setImages(repair.images);
+      return;
+    }
+
+    console.log('No hay imágenes en repair.images, intentando cargar de API...');
+
+    // Si no, cargar desde la API - intentar con ID y UUID
+    const loadImages = async () => {
+      setLoadingImages(true);
+      try {
+        const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
+        
+        // Intentar primero con el ID numérico
+        let response = await fetch(`${apiUrl}/images-repair/${repair.id}`);
+        
+        if (!response.ok) {
+          console.warn(`No se encontraron imágenes con ID ${repair.id}, status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        if (data.success && Array.isArray(data.images) && data.images.length > 0) {
+          console.log('Imágenes cargadas de API:', data.images);
+          setImages(data.images);
+        } else {
+          console.log('No hay imágenes en el servidor');
+          setImages([]);
+        }
+      } catch (error) {
+        console.error('Error cargando imágenes:', error);
+        setImages([]);
+      } finally {
+        setLoadingImages(false);
+      }
+    };
+
+    loadImages();
+  }, [open, repair]);
+
+  const handleOpenReceipt = () => {
+    const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000';
+    const receiptUrl = `${backendUrl}/repair-receipt/${repair?.id}`;
+    window.open(receiptUrl, '_blank');
+  };
+
+  if (!open || !repair) return null;
+
+  const total = typeof repair.total_amount === 'string' 
+    ? parseFloat(repair.total_amount) 
+    : repair.total_amount;
+
+  return (
+    <ModalScaffold onBackdropClick={onClose} zIndexClass="z-[60]">
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="repair-detail-title"
+        className="flex h-auto w-full max-w-2xl shrink-0 flex-col rounded-2xl border border-slate-200/80 bg-white shadow-xl"
+      >
+        <div className="shrink-0 border-b border-slate-200 px-6 py-4">
+          <h2 id="repair-detail-title" className="text-lg font-semibold text-slate-900">
+            Reparación {repair.repair_code}
+          </h2>
+          <div className="mt-3 grid gap-2 text-sm text-slate-600 sm:grid-cols-2">
+            <p>
+              <span className="font-medium text-slate-700">Estado: </span>
+              <span className="inline-block rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-800">
+                {statusLabel(repair.status)}
+              </span>
+            </p>
+            <p>
+              <span className="font-medium text-slate-700">Cliente: </span>
+              {clientDisplayName(repair.client ?? undefined)}
+            </p>
+            <p>
+              <span className="font-medium text-slate-700">Técnico: </span>
+              {technicianDisplayName(repair.technician ?? undefined)}
+            </p>
+            <p>
+              <span className="font-medium text-slate-700">Total: </span>
+              <span className="tabular-nums text-slate-900 font-medium">{formatCurrency(total)}</span>
+            </p>
+          </div>
+        </div>
+
+        <div className="px-6 py-4 space-y-4 max-h-[60vh] overflow-y-auto">
+          {/* Dispositivo */}
+          <div>
+            <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">Dispositivo</p>
+            <p className="mt-1 text-sm text-slate-900">{repair.device_description}</p>
+          </div>
+
+          {/* Imágenes */}
+          {images && images.length > 0 && (
+            <div>
+              <p className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-3">
+                Imágenes de Reparación ({images.length})
+              </p>
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                {images.map((image, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => setSelectedImageUrl(image.url)}
+                    className="group relative overflow-hidden rounded-lg border border-slate-200 bg-slate-50 hover:border-indigo-300 transition-all"
+                  >
+                    <img
+                      src={image.url}
+                      alt={image.name}
+                      className="h-24 w-full object-cover group-hover:scale-105 transition-transform"
+                      loading="lazy"
+                    />
+                    <div className="absolute inset-0 bg-opacity-0 group-hover:bg-opacity-20 transition-all flex items-center justify-center">
+                      <span className="text-white opacity-0 group-hover:opacity-100 text-xs font-medium">Ver</span>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Falla */}
+          <div>
+            <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">Falla Reportada</p>
+            <p className="mt-1 text-sm text-slate-900 whitespace-pre-wrap">{repair.fault_description}</p>
+          </div>
+
+          {/* Boleta */}
+          {repair.receipt_number && (
+            <div>
+              <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">Boleta</p>
+              <p className="mt-1 text-sm font-mono text-slate-900">{repair.receipt_number}</p>
+            </div>
+          )}
+
+          {/* Notas */}
+          {repair.repair_notes && (
+            <div>
+              <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">Notas Técnicas</p>
+              <p className="mt-1 text-sm text-slate-900 whitespace-pre-wrap">{repair.repair_notes}</p>
+            </div>
+          )}
+
+          {/* Fecha de entrega */}
+          {repair.delivered_at && (
+            <div>
+              <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">Fecha de Entrega</p>
+              <p className="mt-1 text-sm text-slate-900">{repair.delivered_at}</p>
+            </div>
+          )}
+
+          {/* Metadata */}
+          <div className="border-t border-slate-200 pt-4">
+            <div className="grid gap-2 text-xs text-slate-600">
+              <p>
+                <span className="font-medium text-slate-700">Registrado: </span>
+                {repair.created_at}
+              </p>
+              {repair.updated_at && repair.updated_at !== repair.created_at && (
+                <p>
+                  <span className="font-medium text-slate-700">Actualizado: </span>
+                  {repair.updated_at}
+                </p>
+              )}
+            </div>
+          </div>
+        </div>
+
+        <div className="flex items-center justify-end gap-3 border-t border-slate-200 px-6 py-4">
+          <button
+            type="button"
+            onClick={() => setShowQRModal(true)}
+            className="rounded-lg border border-indigo-300 bg-indigo-50 px-4 py-2 text-sm font-medium text-indigo-700 hover:bg-indigo-100"
+          >
+            🔗 Ver Comprobante QR
+          </button>
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+          >
+            Cerrar
+          </button>
+        </div>
+      </div>
+
+      {/* Modal para mostrar QR del comprobante */}
+      {showQRModal && (
+        <ModalScaffold
+          onBackdropClick={() => setShowQRModal(false)}
+          zIndexClass="z-[70]"
+        >
+          <div className="flex flex-col items-center justify-center p-8 bg-white rounded-lg shadow-2xl max-w-sm">
+            <h3 className="text-lg font-semibold text-slate-900 mb-2">
+              Comprobante de Reparación
+            </h3>
+            <p className="text-sm text-slate-600 mb-4 text-center">
+              Código: <span className="font-mono font-medium">{repair?.repair_code}</span>
+            </p>
+            
+            <div className="mb-6 p-4 bg-white border border-slate-200 rounded-lg">
+              <img
+                src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(
+                  `${import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000'}/repair-receipt/${repair?.id}`
+                )}`}
+                alt="QR Code"
+                className="w-48 h-48"
+              />
+            </div>
+            
+            <div className="flex flex-col gap-2 w-full">
+              <button
+                onClick={handleOpenReceipt}
+                className="w-full rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-indigo-700 transition-colors"
+              >
+                📄 Ver y Descargar Comprobante
+              </button>
+              <button
+                onClick={() => setShowQRModal(false)}
+                className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors"
+              >
+                Cerrar
+              </button>
+            </div>
+          </div>
+        </ModalScaffold>
+      )}
+
+      {/* Modal para ver imagen expandida */}
+      {selectedImageUrl && (
+        <ModalScaffold
+          onBackdropClick={() => setSelectedImageUrl(null)}
+          zIndexClass="z-[70]"
+        >
+          <div className="flex flex-col items-center justify-center p-4">
+            <img
+              src={selectedImageUrl}
+              alt="Imagen expandida"
+              className="max-h-[80vh] max-w-[90vw] rounded-lg shadow-2xl"
+            />
+            <button
+              onClick={() => setSelectedImageUrl(null)}
+              className="mt-4 rounded-lg bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+            >
+              Cerrar
+            </button>
+          </div>
+        </ModalScaffold>
+      )}
+    </ModalScaffold>
+  );
+}

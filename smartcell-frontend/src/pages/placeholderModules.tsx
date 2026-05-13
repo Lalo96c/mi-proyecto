@@ -9,13 +9,3 @@ export function CategoriasPage() {
     />
   );
 }
-
-export function SoportePage() {
-  return (
-    <ModulePlaceholderPage
-      eyebrow="Soporte"
-      title="Soporte técnico"
-      description="Incidencias, tickets y ayuda."
-    />
-  );
-}

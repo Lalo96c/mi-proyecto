@@ -14,6 +14,9 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         // Invitados sin sesión web: redirige a /. Las rutas /api/* no usan esto si la respuesta es JSON.
         $middleware->redirectGuestsTo(fn () => '/');
+        
+        // Registrar middleware custom para asegurar JSON en rutas de imagen
+        $middleware->append(\App\Http\Middleware\EnsureJsonResponse::class);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         /*

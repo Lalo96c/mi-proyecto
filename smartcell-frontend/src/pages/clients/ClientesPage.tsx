@@ -23,6 +23,7 @@ function mapClientRow(c: ApiClient): ClientTableRow {
     id: c.id,
     dni: c.dni,
     nombre: `${c.first_name} ${c.last_name}`,
+    phone: c.phone,
     _raw: c,
   };
 }
@@ -34,6 +35,13 @@ export function ClientesPage() {
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string[] | null>(null);
 
+  // Filtros
+  const [filters, setFilters] = useState({
+    dni: '',
+    first_name: '',
+    last_name: '',
+  });
+
   const [modalOpen, setModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState<'create' | 'edit'>('create');
   const [editingClient, setEditingClient] = useState<ApiClient | null>(null);
@@ -44,7 +52,13 @@ export function ClientesPage() {
     setLoading(true);
     setLoadError(null);
     try {
-      const res = await fetchClients({ page: p, per_page: 15 });
+      const res = await fetchClients({ 
+        page: p, 
+        per_page: 15,
+        dni: filters.dni,
+        first_name: filters.first_name,
+        last_name: filters.last_name,
+      });
 
       setRows((res.data ?? []).map(mapClientRow));
       setMeta(res.meta ?? null);
@@ -55,11 +69,21 @@ export function ClientesPage() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [filters]);
 
   useEffect(() => {
     loadClients(page);
   }, [page, loadClients]);
+
+  function handleFilterChange(field: keyof typeof filters, value: string) {
+    setFilters(prev => ({ ...prev, [field]: value }));
+    setPage(1); // Reset a la página 1 cuando cambia el filtro
+  }
+
+  function handleClearFilters() {
+    setFilters({ dni: '', first_name: '', last_name: '' });
+    setPage(1);
+  }
 
   // 🔥 MODAL
   function openCreate() {
@@ -104,7 +128,13 @@ export function ClientesPage() {
     try {
       await deleteClient(row.id);
 
-      const res = await fetchClients({ page, per_page: 15 });
+      const res = await fetchClients({ 
+        page, 
+        per_page: 15,
+        dni: filters.dni,
+        first_name: filters.first_name,
+        last_name: filters.last_name,
+      });
 
       if ((res.data?.length ?? 0) === 0 && page > 1) {
         setPage((p) => p - 1);
@@ -124,6 +154,12 @@ export function ClientesPage() {
       key: 'nombre',
       label: 'Nombre completo',
       cellClassName: 'min-w-[10rem] font-medium text-slate-900',
+    },
+    {
+      key: 'phone',
+      label: 'Teléfono',
+      cellClassName: 'min-w-[10rem]',
+      render: (r) => r.phone || '—',
     },
     {
       key: 'actions',
@@ -171,6 +207,57 @@ export function ClientesPage() {
       <div className="flex-1 p-6 sm:p-8">
         {/* 🔥 MISMO WIDTH QUE PRODUCTOS */}
         <div className="mx-auto max-w-6xl space-y-6">
+
+          {/* Filtros */}
+          <div className="grid gap-4 rounded-xl border border-slate-200/70 bg-white p-4 shadow-sm shadow-slate-900/5 md:grid-cols-3">
+            <div>
+              <label className="block text-xs font-medium text-slate-700 mb-1">
+                DNI
+              </label>
+              <input
+                type="text"
+                placeholder="Buscar por DNI..."
+                value={filters.dni}
+                onChange={(e) => handleFilterChange('dni', e.target.value)}
+                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm placeholder-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-slate-700 mb-1">
+                Nombre
+              </label>
+              <input
+                type="text"
+                placeholder="Buscar por nombre..."
+                value={filters.first_name}
+                onChange={(e) => handleFilterChange('first_name', e.target.value)}
+                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm placeholder-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-slate-700 mb-1">
+                Apellido
+              </label>
+              <input
+                type="text"
+                placeholder="Buscar por apellido..."
+                value={filters.last_name}
+                onChange={(e) => handleFilterChange('last_name', e.target.value)}
+                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm placeholder-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+              />
+            </div>
+            {Object.values(filters).some(v => v) && (
+              <div className="md:col-span-3 flex justify-end">
+                <button
+                  type="button"
+                  onClick={handleClearFilters}
+                  className="inline-flex items-center rounded-lg bg-slate-100 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-200"
+                >
+                  Limpiar filtros
+                </button>
+              </div>
+            )}
+          </div>
 
           {loadError?.length ? (
             <div className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-900">

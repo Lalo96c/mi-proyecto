@@ -101,6 +101,23 @@ function IconLogout({ className = 'h-5 w-5' }: { className?: string }) {
   );
 }
 
+function IconArrows({ className = 'h-5 w-5' }: { className?: string }) {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className={className} aria-hidden>
+      <path d="M16 17.01V10h-2v7.01h-3L15 21l4-3.99h-3zM9 3L5 6.99h3V14h2V6.99h3L9 3z" />
+    </svg>
+  );
+}
+
+function IconTruck({ className = 'h-5 w-5' }: { className?: string }) {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className={className} aria-hidden>
+      <path d="M18.75 3h-8.5a2.25 2.25 0 00-2.25 2.25v8.25a3 3 0 003 3h10.5a3 3 0 003-3V9a3 3 0 00-3-3zm-1.5 6h-6v-3h6v3z" />
+      <path d="M4 17.25a2.25 2.25 0 100 4.5 2.25 2.25 0 000-4.5zm12 0a2.25 2.25 0 100 4.5 2.25 2.25 0 000-4.5z" />
+    </svg>
+  );
+}
+
 type NavItem = {
   to: string;
   label: string;
@@ -110,8 +127,10 @@ type NavItem = {
 
 const DEFAULT_ITEMS: NavItem[] = [
   { to: '/productos', label: 'Inventario', Icon: IconShoppingBag },
+  { to: '/inventory-movements', label: 'Movimientos', Icon: IconArrows },
   { to: '/clientes', label: 'Clientes', Icon: IconFolder }, 
   { to: '/ventas', label: 'Ventas', Icon: IconChart },
+  { to: '/compras', label: 'Compras', Icon: IconTruck },
   { to: '/soporte', label: 'Soporte técnico', Icon: IconInbox },
 ];
 

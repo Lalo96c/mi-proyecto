@@ -38,8 +38,13 @@ RUN chmod +x /usr/bin/composer \
     && ln -sf "${BIN}/laravel" /usr/local/bin/laravel \
     && laravel --version
 
-# Permitir FastCGI desde nginx (otro contenedor); la imagen por defecto suele usar 127.0.0.1:9000
+# PHP-FPM escuchando desde otros contenedores
 RUN sed -i 's/listen = 127.0.0.1:9000/listen = 0.0.0.0:9000/' /usr/local/etc/php-fpm.d/www.conf \
-    && php-fpm -t
+    && php-fpm -t \
+    && echo "upload_max_filesize = 50M" >> /usr/local/etc/php/php.ini \
+    && echo "post_max_size = 50M" >> /usr/local/etc/php/php.ini \
+    && echo "memory_limit = 256M" >> /usr/local/etc/php/php.ini
 
 WORKDIR /var/www/html
+
+CMD ["php-fpm"]

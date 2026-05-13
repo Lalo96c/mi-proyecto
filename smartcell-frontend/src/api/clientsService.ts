@@ -6,6 +6,9 @@ export async function fetchClients(params?: {
   page?: number;
   per_page?: number;
   search?: string;
+  dni?: string;
+  first_name?: string;
+  last_name?: string;
 }) {
   const { data } = await httpClient.get('/clients', { params });
   return data;

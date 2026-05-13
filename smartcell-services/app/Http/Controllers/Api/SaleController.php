@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreSaleRequest;
 use App\Http\Requests\UpdateSaleRequest;
 use App\Http\Resources\SaleResource;
+use App\Models\InventoryMovement;
 use App\Models\Product;
 use App\Models\Sale;
 use App\Models\SaleDetail;
@@ -21,8 +22,19 @@ class SaleController extends Controller
         $perPage = (int) $request->query('per_page', 15);
         $perPage = max(1, min($perPage, 100));
 
+        $filters = [
+            'sale_code' => $request->query('sale_code'),
+        ];
+
+        $dateFrom = $request->query('date_from');
+        $dateTo = $request->query('date_to');
+        $clientId = (int) $request->query('client_id', 0) ?: null;
+
         $sales = Sale::query()
             ->with(['client', 'saleDetails.product'])
+            ->filter($filters)
+            ->filterByDateRange($dateFrom, $dateTo)
+            ->filterByClient($clientId)
             ->orderByDesc('id')
             ->paginate($perPage)
             ->withQueryString();
@@ -83,6 +95,14 @@ class SaleController extends Controller
                 }
 
                 $product->decrement('quantity', $quantity);
+
+                // Create inventory movement for sale
+                InventoryMovement::create([
+                    'product_id' => $product->id,
+                    'type' => InventoryMovement::TYPE_SALIDA,
+                    'quantity' => $quantity,
+                    'reason' => InventoryMovement::REASON_VENTA,
+                ]);
 
                 $lineTotal = round($quantity * $unitPrice, 2);
 
