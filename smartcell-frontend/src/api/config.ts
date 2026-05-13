@@ -2,12 +2,10 @@
 let publicConfig: { public_url: string; api_url: string } | null = null;
 let configPromise: Promise<any> | null = null;
 
-const isLocalhost = () => {
-  const hostname = window.location.hostname;
-  return hostname === 'localhost' || hostname === '127.0.0.1';
-};
-
 const getApiUrl = () => {
+  // NUNCA usar localhost, siempre intentar desde donde se está accediendo
+  // Si accedes desde 192.168.x.x, usará 192.168.x.x:8000
+  // Si accedes desde localhost, aún así intentará localhost:8000 pero debería acceder desde IP
   const hostname = window.location.hostname;
   return `http://${hostname}:8000/api`;
 };
@@ -18,8 +16,8 @@ const getBackendUrl = () => {
 };
 
 /**
- * Obtiene la URL pública desde el servidor
- * Solo intenta fetchear si no estamos en localhost
+ * Obtiene la URL pública desde el servidor (OBLIGATORIO)
+ * Esta es la ÚNICA fuente de verdad para los QR
  */
 export const fetchPublicConfig = async () => {
   // Si ya hay una promesa en progreso, esperarla
@@ -28,77 +26,78 @@ export const fetchPublicConfig = async () => {
   }
 
   configPromise = (async () => {
-    // Si estamos en localhost, no intentar fetchear la config
-    if (isLocalhost()) {
-      console.log('💻 Running on localhost - using localhost:8000 directly');
-      publicConfig = {
-        public_url: 'http://localhost:8000',
-        api_url: 'http://localhost:8000/api',
-      };
-      return publicConfig;
-    }
+    let attempts = 0;
+    const maxAttempts = 3;
 
-    // Estamos en una IP, intentar fetchear la config del servidor
-    try {
-      const apiUrl = getApiUrl();
-      const configUrl = `${apiUrl}/config`;
-      
-      console.log('📡 Fetching public config from:', configUrl);
-      
-      const response = await fetch(configUrl, {
-        method: 'GET',
-        headers: { 'Accept': 'application/json' },
-      });
-      
-      if (response.ok) {
-        const data = await response.json();
-        console.log('✅ Public config response:', data);
+    while (attempts < maxAttempts) {
+      try {
+        const apiUrl = getApiUrl();
+        const configUrl = `${apiUrl}/config`;
         
-        if (data.success && data.public_url) {
-          publicConfig = {
-            public_url: data.public_url,
-            api_url: data.api_url || data.public_url + '/api',
-          };
-          console.log('✅ Public config loaded:', publicConfig.public_url);
-          return publicConfig;
+        console.log(`📡 [Intento ${attempts + 1}/${maxAttempts}] Obteniendo configuración desde:`, configUrl);
+        
+        const response = await fetch(configUrl, {
+          method: 'GET',
+          headers: { 'Accept': 'application/json' },
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          console.log('✅ Respuesta de config:', data);
+          
+          if (data.success && data.public_url) {
+            publicConfig = {
+              public_url: data.public_url,
+              api_url: data.api_url || data.public_url + '/api',
+            };
+            console.log('✅ Configuración cargada correctamente:', publicConfig.public_url);
+            return publicConfig;
+          }
+        } else {
+          console.warn(`⚠️ Config endpoint retornó ${response.status}:`, await response.text());
         }
-      } else {
-        console.warn(`⚠️ Config endpoint returned ${response.status}:`, await response.text());
+      } catch (error) {
+        console.warn(`⚠️ Intento ${attempts + 1} falló:`, error);
       }
-    } catch (error) {
-      console.warn('⚠️ Could not fetch public config:', error);
+      
+      attempts++;
+      if (attempts < maxAttempts) {
+        await new Promise(resolve => setTimeout(resolve, 500)); // Esperar 500ms antes de reintentar
+      }
     }
     
-    // Fallback a la IP/hostname actual
-    const fallbackUrl = getBackendUrl();
-    console.log('⚠️ Using fallback URL:', fallbackUrl);
-    publicConfig = {
-      public_url: fallbackUrl,
-      api_url: fallbackUrl + '/api',
-    };
-    return publicConfig;
+    console.error('❌ No se pudo obtener la configuración del servidor después de 3 intentos');
+    console.error('❌ Asegúrate de acceder desde la IP correcta (ejemplo: http://192.168.18.6:5173)');
+    console.error('❌ NO uses localhost - accede siempre desde la IP del servidor');
+    
+    return null;
   })();
 
   return configPromise;
 };
 
 /**
- * Obtiene la URL pública del servidor (sincrónico - usa lo que está disponible)
+ * Obtiene la URL pública del servidor (DEBE estar cargada previamente)
+ * NUNCA retorna localhost
  */
-export const getPublicUrl = () => {
-  if (publicConfig?.public_url) {
-    return publicConfig.public_url;
+export const getPublicUrl = (): string => {
+  if (!publicConfig?.public_url) {
+    console.error('❌ ERROR: Configuración pública NO está cargada');
+    console.error('❌ Llama a fetchPublicConfig() primero');
+    throw new Error('Public config not loaded - call fetchPublicConfig() first');
   }
-  // Fallback a la IP/hostname actual
-  return getBackendUrl();
+  return publicConfig.public_url;
 };
 
 /**
- * Espera a que la configuración pública esté lista y luego retorna la URL
+ * Espera a que la configuración pública esté lista y retorna la URL
  */
 export const getPublicUrlAsync = async (): Promise<string> => {
-  await fetchPublicConfig();
-  return getPublicUrl();
+  const config = await fetchPublicConfig();
+  if (!config?.public_url) {
+    throw new Error('Failed to load public configuration from server');
+  }
+  return config.public_url;
 };
 
 export const API_BASE_URL = getApiUrl();

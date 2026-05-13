@@ -1,5 +1,5 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { AuthProvider } from './context/AuthProvider';
 import { GuestRoute } from './components/GuestRoute';
 import { ProtectedRoute } from './components/ProtectedRoute';
@@ -26,10 +26,56 @@ function AppLayout({ children }: { children: ReactNode }) {
 }
 
 export default function App() {
+  const [configLoaded, setConfigLoaded] = useState(false);
+  const [configError, setConfigError] = useState<string | null>(null);
+
   useEffect(() => {
-    // Obtener configuración pública del servidor al iniciar
-    fetchPublicConfig();
+    // Cargar configuración pública del servidor al iniciar
+    fetchPublicConfig()
+      .then((config) => {
+        if (config) {
+          console.log('✅ App iniciada con configuración correcta');
+          setConfigLoaded(true);
+        } else {
+          const error = 'No se pudo cargar la configuración del servidor';
+          console.error(error);
+          setConfigError(error);
+        }
+      })
+      .catch((error) => {
+        console.error('❌ Error al cargar configuración:', error);
+        setConfigError(error.message);
+      });
   }, []);
+
+  // Mostrar error si no se pudo cargar la configuración
+  if (configError) {
+    return (
+      <div className="flex h-screen items-center justify-center bg-red-50">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-red-600 mb-4">⚠️ Error de Configuración</h1>
+          <p className="text-red-500 mb-2">{configError}</p>
+          <p className="text-gray-600">
+            Asegúrate de acceder desde la IP correcta del servidor<br />
+            <strong>NO uses localhost</strong><br />
+            Ejemplo: <code className="bg-gray-100 px-2 py-1">http://192.168.18.6:5173</code>
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // Mostrar loading mientras se carga la configuración
+  if (!configLoaded) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <div className="text-center">
+          <p className="text-lg font-semibold mb-4">Cargando configuración...</p>
+          <p className="text-gray-600 text-sm">Conectando con el servidor...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <BrowserRouter>
