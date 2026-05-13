@@ -3,4 +3,4 @@ export { httpClient } from './httpClient';
 export * as tokenStorage from './tokenStorage';
 export * as authService from './authService';
 export * as techniciansService from './techniciansService';
-export { imageRepairService } from './imageRepairService';
+export * as imageRepairService from './imageRepairService';

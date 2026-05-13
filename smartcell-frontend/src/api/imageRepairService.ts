@@ -1,49 +1,51 @@
-import { httpClient } from './httpClient';
+import { BACKEND_URL } from './config';
 
-export const imageRepairService = {
-  /**
-   * Upload an image for a repair
-   */
-  uploadImage: async (repairId: string, file: File) => {
-    const formData = new FormData();
-    formData.append('image', file);
+export const uploadImage = async (repairId: string, file: File): Promise<any> => {
+  const formData = new FormData();
+  formData.append('image', file);
 
-    const response = await httpClient.post(
-      `/images-repair/${repairId}`,
-      formData,
-      {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      }
-    );
-    return response.data;
-  },
+  const response = await fetch(`${BACKEND_URL}/api/images-repair/${repairId}`, {
+    method: 'POST',
+    body: formData,
+  });
 
-  /**
-   * Get all images for a repair
-   */
-  getImages: async (repairId: string) => {
-    const response = await httpClient.get(`/images-repair/${repairId}`);
-    return response.data;
-  },
+  if (!response.ok) {
+    throw new Error(`Error uploading image: ${response.statusText}`);
+  }
 
-  /**
-   * Delete a specific image
-   */
-  deleteImage: async (repairId: string, fileName: string) => {
-    const response = await httpClient.delete(
-      `/images-repair/${repairId}/${fileName}`
-    );
-    return response.data;
-  },
+  return response.json();
+};
 
-  /**
-   * Delete all images of a repair (cleanup orphaned images)
-   * Used when canceling a new repair form without saving
-   */
-  deleteRepairFolder: async (repairId: string) => {
-    const response = await httpClient.delete(`/images-repair/${repairId}`);
-    return response.data;
-  },
+export const getImages = async (repairId: string): Promise<any> => {
+  const response = await fetch(`${BACKEND_URL}/api/images-repair/${repairId}`);
+
+  if (!response.ok) {
+    throw new Error(`Error fetching images: ${response.statusText}`);
+  }
+
+  return response.json();
+};
+
+export const deleteImage = async (repairId: string, fileName: string): Promise<any> => {
+  const response = await fetch(`${BACKEND_URL}/api/images-repair/${repairId}/${fileName}`, {
+    method: 'DELETE',
+  });
+
+  if (!response.ok) {
+    throw new Error(`Error deleting image: ${response.statusText}`);
+  }
+
+  return response.json();
+};
+
+export const deleteRepairFolder = async (repairId: string): Promise<any> => {
+  const response = await fetch(`${BACKEND_URL}/api/images-repair/${repairId}`, {
+    method: 'DELETE',
+  });
+
+  if (!response.ok) {
+    throw new Error(`Error deleting repair folder: ${response.statusText}`);
+  }
+
+  return response.json();
 };

@@ -171,7 +171,7 @@ export function DeviceRepairFormModal({
 
     const fetchImages = async () => {
       try {
-        const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000';
+        const backendUrl = getPublicUrl();
         const response = await fetch(`${backendUrl}/api/images-repair/${repairUUID}`);
         if (response.ok) {
           const data = await response.json();
@@ -206,11 +206,11 @@ export function DeviceRepairFormModal({
     qrRef.current.innerHTML = '';
 
     try {
-      const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000';
+      const publicUrl = getPublicUrl();
       const qrCode = new QRCodeStyling({
         width: 160,
         height: 160,
-        data: `${backendUrl}/images-repair-form/${repairUUID}`,
+        data: `${publicUrl}/images-repair-form/${repairUUID}`,
         margin: 10,
         type: 'svg',
         dotsOptions: {

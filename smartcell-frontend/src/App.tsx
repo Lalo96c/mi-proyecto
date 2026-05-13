@@ -1,8 +1,10 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
+import { useEffect } from 'react';
 import { AuthProvider } from './context/AuthProvider';
 import { GuestRoute } from './components/GuestRoute';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { LoginPage, RegisterPage } from './modules/auth';
+import { fetchPublicConfig } from './api/config';
 import {
   ClientesPage,
   HomeDashboard,
@@ -24,6 +26,11 @@ function AppLayout({ children }: { children: ReactNode }) {
 }
 
 export default function App() {
+  useEffect(() => {
+    // Obtener configuración pública del servidor al iniciar
+    fetchPublicConfig();
+  }, []);
+
   return (
     <BrowserRouter>
       <AuthProvider>

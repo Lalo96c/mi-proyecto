@@ -2,6 +2,7 @@ import { ModalScaffold } from '../../components/ModalScaffold';
 import { formatCurrency } from '../../utils/format';
 import type { ApiDeviceRepair, RepairImage } from '../../types/deviceRepair';
 import { clientDisplayName, technicianDisplayName, statusLabel } from '../../types/deviceRepair';
+import { getPublicUrl } from '../../api/config';
 import { useState, useEffect } from 'react';
 
 type DeviceRepairDetailModalProps = {
@@ -65,8 +66,8 @@ export function DeviceRepairDetailModal({ open, repair, onClose }: DeviceRepairD
   }, [open, repair]);
 
   const handleOpenReceipt = () => {
-    const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000';
-    const receiptUrl = `${backendUrl}/repair-receipt/${repair?.id}`;
+    const publicUrl = getPublicUrl();
+    const receiptUrl = `${publicUrl}/repair-receipt/${repair?.id}`;
     window.open(receiptUrl, '_blank');
   };
 
@@ -227,7 +228,7 @@ export function DeviceRepairDetailModal({ open, repair, onClose }: DeviceRepairD
             <div className="mb-6 p-4 bg-white border border-slate-200 rounded-lg">
               <img
                 src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(
-                  `${import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000'}/repair-receipt/${repair?.id}`
+                  `${getPublicUrl()}/repair-receipt/${repair?.id}`
                 )}`}
                 alt="QR Code"
                 className="w-48 h-48"
