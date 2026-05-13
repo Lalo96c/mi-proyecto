@@ -10,10 +10,14 @@ use App\Http\Controllers\Api\InventoryMovementController;
 use App\Http\Controllers\Api\DeviceRepairController;
 use App\Http\Controllers\Api\TechnicianController;
 use App\Http\Controllers\Api\ImageRepairController;
+use App\Http\Controllers\Api\ConfigController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/auth/login', [AuthController::class, 'login']);
 Route::post('/auth/register', [AuthController::class, 'register']);
+
+// Ruta pública para obtener configuración
+Route::get('/config', [ConfigController::class, 'getPublicConfig'])->name('api.config.public');
 
 Route::post('/auth/refresh', [AuthController::class, 'refresh'])->middleware('jwt.refresh');
 
