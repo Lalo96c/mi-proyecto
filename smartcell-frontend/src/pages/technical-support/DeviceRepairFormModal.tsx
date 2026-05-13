@@ -5,6 +5,7 @@ import { ModalScaffold } from '../../components/ModalScaffold';
 import type { ApiDeviceRepair, DeviceRepairPayload, ApiTechnician, RepairImage } from '../../types/deviceRepair';
 import type { ApiClient } from '../../types/client';
 import { techniciansService, imageRepairService } from '../../api';
+import { getPublicUrlAsync } from '../../api/config';
 import { v4 as uuidv4 } from 'uuid';
 import QRCodeStyling from 'qr-code-styling';
 
@@ -205,27 +206,31 @@ export function DeviceRepairFormModal({
     // Limpiar contenido anterior
     qrRef.current.innerHTML = '';
 
-    try {
-      const publicUrl = getPublicUrl();
-      const qrCode = new QRCodeStyling({
-        width: 160,
-        height: 160,
-        data: `${publicUrl}/images-repair-form/${repairUUID}`,
-        margin: 10,
-        type: 'svg',
-        dotsOptions: {
-          color: '#667eea',
-          type: 'square',
-        },
-        backgroundOptions: {
-          color: '#ffffff',
-        },
-      });
+    const generateQR = async () => {
+      try {
+        const publicUrl = await getPublicUrlAsync();
+        const qrCode = new QRCodeStyling({
+          width: 160,
+          height: 160,
+          data: `${publicUrl}/images-repair-form/${repairUUID}`,
+          margin: 10,
+          type: 'svg',
+          dotsOptions: {
+            color: '#667eea',
+            type: 'square',
+          },
+          backgroundOptions: {
+            color: '#ffffff',
+          },
+        });
 
-      qrCode.append(qrRef.current);
-    } catch (error) {
-      console.error('Error al generar QR:', error);
-    }
+        qrCode.append(qrRef.current);
+      } catch (error) {
+        console.error('Error al generar QR:', error);
+      }
+    };
+
+    generateQR();
   }, [repairUUID, mode]);
 
   if (!open) return null;

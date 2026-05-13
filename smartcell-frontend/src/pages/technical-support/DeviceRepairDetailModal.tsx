@@ -2,7 +2,7 @@ import { ModalScaffold } from '../../components/ModalScaffold';
 import { formatCurrency } from '../../utils/format';
 import type { ApiDeviceRepair, RepairImage } from '../../types/deviceRepair';
 import { clientDisplayName, technicianDisplayName, statusLabel } from '../../types/deviceRepair';
-import { getPublicUrl } from '../../api/config';
+import { getPublicUrlAsync } from '../../api/config';
 import { useState, useEffect } from 'react';
 
 type DeviceRepairDetailModalProps = {
@@ -16,6 +16,16 @@ export function DeviceRepairDetailModal({ open, repair, onClose }: DeviceRepairD
   const [images, setImages] = useState<RepairImage[]>([]);
   const [loadingImages, setLoadingImages] = useState(false);
   const [showQRModal, setShowQRModal] = useState(false);
+  const [publicUrl, setPublicUrl] = useState<string | null>(null);
+
+  // Cargar URL pública cuando se abre el modal
+  useEffect(() => {
+    if (!open) return;
+    
+    getPublicUrlAsync().then((url) => {
+      setPublicUrl(url);
+    });
+  }, [open]);
 
   // Cargar imágenes desde la API cuando se abre el modal
   useEffect(() => {
@@ -66,7 +76,7 @@ export function DeviceRepairDetailModal({ open, repair, onClose }: DeviceRepairD
   }, [open, repair]);
 
   const handleOpenReceipt = () => {
-    const publicUrl = getPublicUrl();
+    if (!publicUrl) return;
     const receiptUrl = `${publicUrl}/repair-receipt/${repair?.id}`;
     window.open(receiptUrl, '_blank');
   };
@@ -226,13 +236,19 @@ export function DeviceRepairDetailModal({ open, repair, onClose }: DeviceRepairD
             </p>
             
             <div className="mb-6 p-4 bg-white border border-slate-200 rounded-lg">
-              <img
-                src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(
-                  `${getPublicUrl()}/repair-receipt/${repair?.id}`
-                )}`}
-                alt="QR Code"
-                className="w-48 h-48"
-              />
+              {publicUrl ? (
+                <img
+                  src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(
+                    `${publicUrl}/repair-receipt/${repair?.id}`
+                  )}`}
+                  alt="QR Code"
+                  className="w-48 h-48"
+                />
+              ) : (
+                <div className="w-48 h-48 bg-slate-100 rounded flex items-center justify-center">
+                  <p className="text-slate-500 text-sm">Cargando QR...</p>
+                </div>
+              )}
             </div>
             
             <div className="flex flex-col gap-2 w-full">
