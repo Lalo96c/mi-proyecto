@@ -9,7 +9,7 @@ export function HomePage() {
         className="flex w-full shrink-0 flex-col border-b border-slate-700/60 bg-slate-800 p-3 md:fixed md:left-0 md:top-0 md:z-20 md:h-dvh md:max-h-dvh md:w-80 md:overflow-hidden md:border-b-0 md:border-r md:border-slate-700/60"
         aria-label="Navegación lateral"
       >
-        <AppSidebar title="Smartcell" />
+        <AppSidebar title="Beatcell" />
       </aside>
       {/* md:ml-80 = hueco del sidebar fijo (w-80); flex-1 + min-h-0 para que el overflow-y-auto del hijo funcione */}
       <div className="relative flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-slate-100 md:ml-80">

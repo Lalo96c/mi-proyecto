@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from 'react';
 import { ModalScaffold } from '../../components/ModalScaffold';
 import type { ApiClient, ClientPayload } from '../../types/client';
-import { queryReniecByDni, type ReniecResponse } from '../../api/reniecService';
+import { queryReniecByDni } from '../../api/reniecService';
 
 type FormState = {
   dni: string;

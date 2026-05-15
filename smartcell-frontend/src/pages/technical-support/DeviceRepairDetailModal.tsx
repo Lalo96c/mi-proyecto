@@ -1,7 +1,7 @@
 import { ModalScaffold } from '../../components/ModalScaffold';
 import { formatCurrency } from '../../utils/format';
 import type { ApiDeviceRepair, RepairImage } from '../../types/deviceRepair';
-import { clientDisplayName, technicianDisplayName, statusLabel } from '../../types/deviceRepair';
+import { clientDisplayName, technicianDisplayName, statusLabel, AVAILABLE_TOOLS } from '../../types/deviceRepair';
 import { getPublicUrl } from '../../api/config';
 import { useState, useEffect } from 'react';
 
@@ -14,7 +14,6 @@ type DeviceRepairDetailModalProps = {
 export function DeviceRepairDetailModal({ open, repair, onClose }: DeviceRepairDetailModalProps) {
   const [selectedImageUrl, setSelectedImageUrl] = useState<string | null>(null);
   const [images, setImages] = useState<RepairImage[]>([]);
-  const [loadingImages, setLoadingImages] = useState(false);
   const [showQRModal, setShowQRModal] = useState(false);
 
   // Cargar imágenes desde la API cuando se abre el modal
@@ -35,7 +34,6 @@ export function DeviceRepairDetailModal({ open, repair, onClose }: DeviceRepairD
 
     // Si no, cargar desde la API - intentar con ID y UUID
     const loadImages = async () => {
-      setLoadingImages(true);
       try {
         const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
         
@@ -57,8 +55,6 @@ export function DeviceRepairDetailModal({ open, repair, onClose }: DeviceRepairD
       } catch (error) {
         console.error('Error cargando imágenes:', error);
         setImages([]);
-      } finally {
-        setLoadingImages(false);
       }
     };
 
@@ -117,6 +113,20 @@ export function DeviceRepairDetailModal({ open, repair, onClose }: DeviceRepairD
         </div>
 
         <div className="px-6 py-4 space-y-4 max-h-[60vh] overflow-y-auto">
+          {/* Tipo de dispositivo */}
+          <div>
+            <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">Tipo de dispositivo</p>
+            <p className="mt-1 text-sm text-slate-900">{repair.device_type ?? 'Otros'}</p>
+          </div>
+
+          {/* Bloqueo de pantalla */}
+          {repair.device_lock && (
+            <div>
+              <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">Bloqueo de pantalla</p>
+              <p className="mt-1 text-sm text-slate-900 whitespace-pre-wrap">{repair.device_lock}</p>
+            </div>
+          )}
+
           {/* Dispositivo */}
           <div>
             <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">Dispositivo</p>
@@ -173,6 +183,33 @@ export function DeviceRepairDetailModal({ open, repair, onClose }: DeviceRepairD
             </div>
           )}
 
+          {/* Herramientas utilizadas */}
+          {repair.tools_used && repair.tools_used.length > 0 && (
+            <div>
+              <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">Herramientas Utilizadas</p>
+              <div className="mt-3 space-y-2">
+                {repair.tools_used.map((toolId: string) => {
+                  const tool = AVAILABLE_TOOLS.find(t => t.id === toolId);
+                  return tool ? (
+                    <div key={toolId} className="flex items-center gap-2 rounded-lg bg-slate-50 px-3 py-2 text-sm">
+                      <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-indigo-100 text-indigo-700 text-xs font-semibold">
+                        {tool.category === 'diagnostico' && '🔍'}
+                        {tool.category === 'reparacion' && '🔧'}
+                        {tool.category === 'limpieza' && '🧹'}
+                        {tool.category === 'seguridad' && '⚡'}
+                        {tool.category === 'otro' && '📦'}
+                      </span>
+                      <div className="flex-1">
+                        <p className="font-medium text-slate-900">{tool.name}</p>
+                        <p className="text-xs text-slate-500 capitalize">{tool.category}</p>
+                      </div>
+                    </div>
+                  ) : null;
+                })}
+              </div>
+            </div>
+          )}
+
           {/* Fecha de entrega */}
           {repair.delivered_at && (
             <div>
@@ -180,6 +217,29 @@ export function DeviceRepairDetailModal({ open, repair, onClose }: DeviceRepairD
               <p className="mt-1 text-sm text-slate-900">{repair.delivered_at}</p>
             </div>
           )}
+
+          {/* Información financiera */}
+          <div className="border-t border-slate-200 pt-4">
+            <p className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-3">Información Financiera</p>
+            <div className="grid gap-3 sm:grid-cols-3">
+              <div className="rounded-lg bg-blue-50 p-3">
+                <p className="text-xs font-medium text-blue-700 uppercase tracking-wider">Total Estimado</p>
+                <p className="mt-1 text-lg font-semibold text-blue-900">S/ {total.toFixed(2)}</p>
+              </div>
+              {repair.advance_amount && parseFloat(String(repair.advance_amount)) > 0 && (
+                <div className="rounded-lg bg-green-50 p-3">
+                  <p className="text-xs font-medium text-green-700 uppercase tracking-wider">Anticipo</p>
+                  <p className="mt-1 text-lg font-semibold text-green-900">S/ {parseFloat(String(repair.advance_amount)).toFixed(2)}</p>
+                </div>
+              )}
+              <div className="rounded-lg bg-orange-50 p-3">
+                <p className="text-xs font-medium text-orange-700 uppercase tracking-wider">Restante</p>
+                <p className="mt-1 text-lg font-semibold text-orange-900">
+                  S/ {Math.max(total - (repair.advance_amount ? parseFloat(String(repair.advance_amount)) : 0), 0).toFixed(2)}
+                </p>
+              </div>
+            </div>
+          </div>
 
           {/* Metadata */}
           <div className="border-t border-slate-200 pt-4">

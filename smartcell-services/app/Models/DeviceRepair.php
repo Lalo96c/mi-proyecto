@@ -13,13 +13,17 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property string $repair_code
  * @property int $client_id
  * @property int|null $technician_id
+ * @property string $device_type
+ * @property string|null $device_lock
  * @property string $device_description
  * @property string $fault_description
  * @property string $status
  * @property string $total_amount
+ * @property string|null $advance_amount
  * @property string|null $receipt_number
  * @property string|null $repair_notes
  * @property array|null $images
+ * @property array|null $tools_used
  * @property string|null $delivered_at
  */
 class DeviceRepair extends Model
@@ -32,13 +36,17 @@ class DeviceRepair extends Model
         'repair_code',
         'client_id',
         'technician_id',
+        'device_type',
+        'device_lock',
         'device_description',
         'fault_description',
         'status',
         'total_amount',
+        'advance_amount',
         'receipt_number',
         'repair_notes',
         'images',
+        'tools_used',
         'delivered_at',
     ];
 
@@ -51,8 +59,10 @@ class DeviceRepair extends Model
     {
         return [
             'total_amount' => 'decimal:2',
+            'advance_amount' => 'decimal:2',
             'delivered_at' => 'datetime',
             'images' => 'array',
+            'tools_used' => 'array',
         ];
     }
 

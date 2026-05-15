@@ -43,7 +43,7 @@ function validateLastName(value: string): string | undefined {
 }
 
 function validatePhone(value: string): string | undefined {
-  if (!value.trim()) return undefined;
+  if (!value.trim()) return 'El teléfono es requerido';
   if (!/^[0-9\s\-\+\(\)]*$/.test(value)) {
     return 'El teléfono solo puede contener números, espacios, guiones, + o paréntesis';
   }
@@ -51,12 +51,12 @@ function validatePhone(value: string): string | undefined {
 }
 
 type QuickClientFormProps = {
-  open: boolean;
+  isOpen: boolean;
   onClose: () => void;
   onClientCreated: (client: ApiClient) => void;
 };
 
-export function QuickClientForm({ open, onClose, onClientCreated }: QuickClientFormProps) {
+export function QuickClientForm({ isOpen, onClose, onClientCreated }: QuickClientFormProps) {
   const [form, setForm] = useState<FormState>(emptyForm());
   const [errors, setErrors] = useState<ValidationErrors>({});
   const [searchingDni, setSearchingDni] = useState(false);
@@ -138,7 +138,7 @@ export function QuickClientForm({ open, onClose, onClientCreated }: QuickClientF
     }
   }
 
-  if (!open) return null;
+  if (!isOpen) return null;
 
   return (
     <ModalScaffold onBackdropClick={onClose}>
@@ -262,7 +262,7 @@ export function QuickClientForm({ open, onClose, onClientCreated }: QuickClientF
           {/* TELÉFONO */}
           <div>
             <label htmlFor="q-phone" className="block text-sm font-medium text-slate-700">
-              Teléfono
+              Teléfono *
             </label>
             <input
               id="q-phone"

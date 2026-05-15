@@ -3,8 +3,8 @@ import type { LaravelPaginationMeta } from './product';
 export type ApiTechnician = {
   id: number;
   name: string;
+  dni: string;
   specialty: string;
-  email: string;
   phone?: string;
   status: 'activo' | 'inactivo';
 };
@@ -24,10 +24,13 @@ export type ApiDeviceRepair = {
   client?: ApiClient | null;
   technician_id?: number | null;
   technician?: ApiTechnician | null;
+  device_type?: string | null;
+  device_lock?: string | null;
   device_description: string;
   fault_description: string;
   status: 'recibido' | 'en_reparacion' | 'reparado' | 'entregado';
   total_amount: string | number;
+  advance_amount?: string | number | null;
   receipt_number?: string | null;
   repair_notes?: string | null;
   images?: RepairImage[] | null;
@@ -42,18 +45,40 @@ export type RepairImage = {
   url: string;
 };
 
+export type Tool = {
+  id: string;
+  name: string;
+  category: 'diagnostico' | 'reparacion' | 'limpieza' | 'otro';
+};
+
+export const AVAILABLE_TOOLS: Tool[] = [
+  { id: 'multimetro', name: 'Multímetro', category: 'diagnostico' },
+  { id: 'destornillador-Phillips', name: 'Destornillador Phillips', category: 'reparacion' },
+  { id: 'destornillador-plano', name: 'Destornillador Plano', category: 'reparacion' },
+  { id: 'pinzas', name: 'Pinzas', category: 'reparacion' },
+  { id: 'soldador', name: 'Soldador', category: 'reparacion' },
+  { id: 'pistola-aire', name: 'Pistola de Aire Comprimido', category: 'limpieza' },
+  { id: 'magnifier', name: 'Lupa de Diagnóstico', category: 'diagnostico' },
+  { id: 'thermal-paste', name: 'Pasta Térmica', category: 'reparacion' },
+  { id: 'isopropyl', name: 'Alcohol Isopropílico', category: 'limpieza' },
+  { id: 'antiestática-pulsera', name: 'Pulsera Antiestática', category: 'seguridad' },
+];
+
 export type DeviceRepairPayload = {
-  repair_code: string;
   client_id: number;
   technician_id?: number | null;
+  device_type: string;
   device_description: string;
+  device_lock?: string | null;
   fault_description: string;
   status: 'recibido' | 'en_reparacion' | 'reparado' | 'entregado';
   total_amount: number;
+  advance_amount?: number | null;
   receipt_number?: string | null;
   repair_notes?: string | null;
   delivered_at?: string | null;
   images?: RepairImage[];
+  tools_used?: string[];
 };
 
 export type DeviceRepairTableRow = {

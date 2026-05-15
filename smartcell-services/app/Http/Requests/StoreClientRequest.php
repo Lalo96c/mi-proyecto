@@ -27,7 +27,7 @@ class StoreClientRequest extends FormRequest
             'dni' => ['required', 'string', 'max:20', Rule::unique('clients', 'dni')->whereNull('deleted_at')],
             'first_name' => ['required', 'string', 'max:100', 'regex:/^[a-záéíóúñ\s]+$/i'],
             'last_name' => ['required', 'string', 'max:100', 'regex:/^[a-záéíóúñ\s]+$/i'],
-            'phone' => ['nullable', 'string', 'max:32', 'regex:/^[0-9\s\-\+\(\)]+$/'],
+            'phone' => ['required', 'string', 'max:32', 'regex:/^[0-9\s\-\+\(\)]+$/'],
         ];
     }
 

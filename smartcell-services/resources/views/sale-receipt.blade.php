@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Comprobante de Reparación - {{ $repair->repair_code }}</title>
+    <title>Boleta de Venta - {{ $sale->sale_code }}</title>
     <style>
         * {
             margin: 0;
@@ -30,7 +30,7 @@
 
         .ticket-header {
             display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
+            grid-template-columns: 1fr auto;
             gap: 15px;
             align-items: flex-start;
             border-bottom: 2px solid #2563eb;
@@ -203,12 +203,12 @@
             font-size: 16px;
         }
 
-        .images-section {
+        .products-section {
             margin-bottom: 25px;
             margin-top: 25px;
         }
 
-        .images-section strong {
+        .products-section strong {
             display: block;
             font-size: 12px;
             text-transform: uppercase;
@@ -218,40 +218,46 @@
             font-weight: 700;
         }
 
-        .images-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 15px;
-            margin-top: 15px;
-        }
-
-        .image-item {
+        .products-table {
+            width: 100%;
+            border-collapse: collapse;
             border: 2px solid #e2e8f0;
             border-radius: 8px;
             overflow: hidden;
-            min-height: 120px;
-            transition: all 0.3s;
         }
 
-        .image-item:hover {
-            border-color: #2563eb;
-            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.1);
+        .products-table thead {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            border-bottom: 2px solid #e2e8f0;
         }
 
-        .image-item img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            display: block;
-        }
-
-        .no-images {
+        .products-table th {
+            padding: 12px;
+            text-align: left;
             font-size: 12px;
-            color: #666;
-            padding: 10px;
-            background: #f8f8f8;
-            border-radius: 6px;
-            text-align: center;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: #2563eb;
+        }
+
+        .products-table td {
+            padding: 12px;
+            border-bottom: 1px solid #e2e8f0;
+            font-size: 13px;
+            color: #1e293b;
+        }
+
+        .products-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .products-table tbody tr:hover {
+            background: #f8fafc;
+        }
+
+        .text-right {
+            text-align: right;
         }
 
         .company-footer {
@@ -422,13 +428,11 @@
                 text-align: center;
             }
 
-            .images-section,
             .print-hide {
                 display: none !important;
             }
 
-            .small-note,
-            .signature {
+            .small-note {
                 display: block !important;
             }
 
@@ -457,6 +461,22 @@
                 font-size: 6px;
                 margin: 1px 4px;
             }
+
+            .products-table thead {
+                background: transparent;
+                border-bottom: 1px solid #333;
+            }
+
+            .products-table th {
+                padding: 2px;
+                font-size: 7px;
+            }
+
+            .products-table td {
+                padding: 2px;
+                font-size: 7px;
+                border-bottom: 1px solid #ccc;
+            }
         }
 
         @media (max-width: 420px) {
@@ -470,6 +490,12 @@
             .details-grid {
                 grid-template-columns: 1fr;
             }
+
+            .products-table th,
+            .products-table td {
+                padding: 8px;
+                font-size: 11px;
+            }
         }
     </style>
 </head>
@@ -477,13 +503,6 @@
 <body>
     <div class="container">
         <div class="ticket-header">
-            <div class="ticket-title-section">
-                <div class="ticket-title">Nota de Reparación</div>
-                <div class="ticket-meta">
-                    <strong>Folio: {{ $repair->repair_code }}</strong>
-                    <p>Fecha: {{ $repair->created_at->format('d/m/Y H:i') }}</p>
-                </div>
-            </div>
             <div class="company-footer">
                 <img src="{{ env('FRONTEND_URL', 'http://localhost:5173') }}/logo.png" alt="Beatcell Logo"
                     onerror="this.style.display='none'">
@@ -491,116 +510,111 @@
                 <div class="company-info">
                     <p>AV. LA UNION N° 1496 Piso 4 - Villa Maria Del Triunfo, Lima, Perú</p>
                     <div class="company-contact-item">
-                        <span>Tel: +51 910 488 419</span>
-                    </div>
-                    <div class="company-contact-item">
-                        <span>WhatsApp: +51 910 488 419</span>
+                        <span>Tel: +51 950262596</span>
                     </div>
                 </div>
             </div>
-            <div class="qr-section">
-                <img id="qr-image" class="ticket-qr" src="" alt="QR Code">
-            </div>
-        </div>
-
-
-
-        <div class="section" style="margin-top: 15px;">
-            <div class="details-grid">
-                <div class="detail-card">
-                    <strong>Dispositivo</strong>
-                    <p>{{ $repair->device_description ?? 'N/A' }}</p>
-                </div>
-                <div class="detail-card">
-                    <strong>Falla reportada</strong>
-                    <p>{{ $repair->fault_description ?? 'Sin información' }}</p>
+            <div class="ticket-title-section">
+                <div class="ticket-title">Boleta de Venta</div>
+                <div class="ticket-meta">
+                    <strong>Folio: {{ $sale->sale_code }}</strong>
+                    <p>Fecha: {{ $sale->created_at->format('d/m/Y H:i') }}</p>
                 </div>
             </div>
         </div>
+
+        @php
+            $productNames = $sale->saleDetails
+                ? $sale->saleDetails->pluck('product.name')->filter()->unique()->implode(', ')
+                : null;
+        @endphp
 
         <div class="section">
             <div class="details-grid">
                 <div class="detail-card">
                     <strong>Cliente</strong>
-                    <p>{{ optional($repair->client)->first_name ?? '---' }}
-                        {{ optional($repair->client)->last_name ?? '' }}</p>
-                    <strong>Tel</strong>
-                    <p>{{ optional($repair->client)->phone ?? 'N/A' }}</p>
+                    <p>{{ optional($sale->client)->first_name ?? '---' }}
+                        {{ optional($sale->client)->last_name ?? '' }}</p>
                     <strong>DNI</strong>
-                    <p>{{ optional($repair->client)->dni ?? 'N/A' }}</p>
+                    <p>{{ optional($sale->client)->dni ?? 'N/A' }}</p>
                 </div>
                 <div class="detail-card">
-                    <strong>Observaciones</strong>
-                    <p>{{ $repair->repair_notes ?: 'Sin observaciones' }}</p>
+                    <strong>Contacto</strong>
+                    <p>{{ optional($sale->client)->phone ?? 'N/A' }}</p>
+                    <strong>Fecha de Venta</strong>
+                    <p>{{ $sale->created_at->format('d/m/Y H:i') }}</p>
                 </div>
             </div>
+        </div>
+
+        @if(!empty($productNames))
+            <div class="section">
+                <div class="detail-card">
+                    <strong>Producto(s) vendidos</strong>
+                    <p>{{ $productNames }}</p>
+                </div>
+            </div>
+        @endif
+
+        <div class="products-section">
+            <strong>Productos</strong>
+            <table class="products-table">
+                <thead>
+                    <tr>
+                        <th>Código</th>
+                        <th>Producto</th>
+                        <th class="text-right">Cant.</th>
+                        <th class="text-right">P. Unit.</th>
+                        <th class="text-right">Subtotal</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse($sale->saleDetails ?? [] as $line)
+                        <tr>
+                            <td>{{ $line->product?->code ?? '#' . $line->product_id }}</td>
+                            <td>{{ $line->product?->name ?? '—' }}</td>
+                            <td class="text-right">{{ number_format($line->quantity, 0) }}</td>
+                            <td class="text-right">S/ {{ number_format($line->unit_price ?? 0, 2, '.', ',') }}</td>
+                            <td class="text-right">S/ {{ number_format($line->line_total ?? 0, 2, '.', ',') }}</td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="5" style="text-align: center; color: #999;">Sin productos registrados</td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
         </div>
 
         <div class="section">
             <div class="totals-row">
                 <div class="total-card">
-                    <strong>Anticipo</strong>
-                    <p>S/ {{ number_format($repair->advance_amount ?? 0, 2, '.', ',') }}</p>
+                    <strong>Subtotal</strong>
+                    <p>S/ {{ number_format(($sale->total_amount ?? 0) * 0.81, 2, '.', ',') }}</p>
                 </div>
                 <div class="total-card">
-                    <strong>Restante</strong>
-                    <p>S/
-                        {{ number_format(max(($repair->total_amount ?? 0) - ($repair->advance_amount ?? 0), 0), 2, '.', ',') }}
-                    </p>
+                    <strong>IGV (19%)</strong>
+                    <p>S/ {{ number_format(($sale->total_amount ?? 0) * 0.19, 2, '.', ',') }}</p>
                 </div>
                 <div class="total-card">
-                    <strong>Total estimado</strong>
-                    <p>S/ {{ number_format($repair->total_amount ?? 0, 2, '.', ',') }}</p>
+                    <strong>Total</strong>
+                    <p>S/ {{ number_format($sale->total_amount ?? 0, 2, '.', ',') }}</p>
                 </div>
             </div>
         </div>
-
-        @if($repair->images && count($repair->images) > 0)
-            <div class="images-section">
-                <strong>Imágenes</strong>
-                <div class="images-grid">
-                    @foreach($repair->images as $image)
-                        <div class="image-item">
-                            <img src="{{ $image['url'] }}" alt="{{ $image['name'] }}">
-                        </div>
-                    @endforeach
-                </div>
-            </div>
-        @endif
 
         <div class="section small-note">
-            <p>Guarde este ticket como comprobante. El equipo queda bajo custodia del taller. No nos hacemos
-                responsables por información no respaldada. El diagnóstico y la reparación se realizan con autorización
-                del cliente.</p>
-        </div>
-
-        <div class="signature">
-            Firma del cliente
-            <div class="signature-line"></div>
+            <p>Gracias por su compra. Guarde este comprobante. Beatcell se reserva el derecho de cambio dentro de 7 días
+                con boleta original.</p>
         </div>
 
         <div class="actions">
             <button class="btn" onclick="window.print()">Imprimir</button>
-            <button class="btn btn-secondary" onclick="downloadQR()">Descargar QR</button>
-            <button class="btn btn-secondary" onclick="window.history.back()">Volver</button>
         </div>
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const qrImageUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=' + encodeURIComponent(window.location.href);
-            const qrImage = document.getElementById('qr-image');
-            if (qrImage) {
-                qrImage.src = qrImageUrl;
-            }
-        });
-
-        window.downloadQR = function () {
-            const link = document.createElement('a');
-            link.href = 'https://api.qrserver.com/v1/create-qr-code/?size=500x500&data=' + encodeURIComponent(window.location.href);
-            link.download = 'comprobante-{{ $repair->repair_code }}.png';
-            link.click();
-        };
+        // Sin QR para boleta de ventas
     </script>
 </body>
 

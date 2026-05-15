@@ -18,8 +18,8 @@ class TechnicianResource extends JsonResource
         return [
             'id' => $this->id,
             'name' => $this->name,
+            'dni' => $this->dni,
             'specialty' => $this->specialty,
-            'email' => $this->email,
             'phone' => $this->phone,
             'status' => $this->status,
             'created_at' => $this->created_at?->toIso8601String(),

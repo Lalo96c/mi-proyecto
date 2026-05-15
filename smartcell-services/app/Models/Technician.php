@@ -12,8 +12,8 @@ use Illuminate\Database\Eloquent\Builder;
 /**
  * @property int $id
  * @property string $name
+ * @property string $dni
  * @property string $specialty
- * @property string $email
  * @property string|null $phone
  * @property string $status
  */
@@ -23,8 +23,8 @@ class Technician extends Model
 
     protected $fillable = [
         'name',
+        'dni',
         'specialty',
-        'email',
         'phone',
         'status',
     ];

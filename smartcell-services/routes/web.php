@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\RepairReceiptController;
+use App\Http\Controllers\SaleReceiptController;
 
 Route::get('/', function () {
     return response()->json([
@@ -34,3 +35,7 @@ Route::delete('/images-repair/{repairId}/{fileName}', function ($repairId, $file
 // Ruta para el comprobante de reparación (accesible públicamente)
 Route::get('/repair-receipt/{id}', [RepairReceiptController::class, 'show'])
     ->name('repair-receipt.show');
+
+// Ruta para la boleta de venta (accesible públicamente)
+Route::get('/sale-receipt/{id}', [SaleReceiptController::class, 'show'])
+    ->name('sale-receipt.show');

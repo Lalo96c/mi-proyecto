@@ -27,6 +27,8 @@ class DeviceRepairFactory extends Factory
             'repair_code' => 'REP-' . fake()->unique()->numerify('######'),
             'client_id' => Client::factory(),
             'technician_id' => fake()->randomElement([Technician::factory(), null]),
+            'device_type' => fake()->randomElement(['Celular', 'Laptop', 'Tablet', 'Computadora', 'Otros']),
+            'device_lock' => fake()->optional()->randomElement(['PIN 1234', 'PATRÓN', 'CONTRASEÑA 0000', null]),
             'device_description' => fake()->randomElement($devices),
             'fault_description' => fake()->randomElement($faults),
             'status' => fake()->randomElement($statuses),

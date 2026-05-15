@@ -28,6 +28,7 @@ Route::middleware('auth:api')->group(function () {
     Route::get('/dashboard/stats', [DashboardController::class, 'stats']);
 
     Route::get('/technicians', [TechnicianController::class, 'index']);
+    Route::post('/technicians', [TechnicianController::class, 'store']);
 
     Route::get('/clients/query-by-dni', [ClientController::class, 'queryByDni']);
     Route::get('/clients', [ClientController::class, 'index']);
@@ -65,6 +66,7 @@ Route::middleware('auth:api')->group(function () {
     Route::get('/device-repairs/{id}', [DeviceRepairController::class, 'show']);
     Route::put('/device-repairs/{id}', [DeviceRepairController::class, 'update']);
     Route::delete('/device-repairs/{id}', [DeviceRepairController::class, 'destroy']);
+    Route::apiResource('technicians', 'App\Http\Controllers\Api\TechnicianController');
 });
 
 // Rutas públicas para gestión de imágenes de reparación (sin autenticación, con CORS)

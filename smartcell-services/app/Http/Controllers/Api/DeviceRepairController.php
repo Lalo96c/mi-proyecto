@@ -9,6 +9,7 @@ use App\Http\Resources\DeviceRepairResource;
 use App\Models\DeviceRepair;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class DeviceRepairController extends Controller
 {
@@ -78,16 +79,29 @@ class DeviceRepairController extends Controller
         }
 
         $repair = DeviceRepair::create([
-            'repair_code' => $data['repair_code'],
+            'repair_code' => Str::uuid()->toString(),
             'client_id' => $data['client_id'],
             'technician_id' => $data['technician_id'] ?? null,
+            'device_type' => $data['device_type'],
+            'device_lock' => $data['device_lock'] ?? null,
             'device_description' => $data['device_description'],
             'fault_description' => $data['fault_description'],
             'status' => $data['status'] ?? 'recibido',
             'total_amount' => $data['total_amount'] ?? 0,
-            'receipt_number' => $data['receipt_number'] ?? null,
+            'advance_amount' => isset($data['advance_amount']) ? $data['advance_amount'] : null,
+            'receipt_number' => null,
             'repair_notes' => $data['repair_notes'] ?? null,
             'images' => $processedImages,
+            'tools_used' => isset($data['tools_used']) && is_array($data['tools_used']) ? $data['tools_used'] : null,
+        ]);
+
+        $sequence = $repair->id;
+        $generatedRepairCode = sprintf('REP-%03d', $sequence);
+        $generatedReceiptNumber = sprintf('BOL-%03d', $sequence);
+
+        $repair->update([
+            'repair_code' => $generatedRepairCode,
+            'receipt_number' => $generatedReceiptNumber,
         ]);
 
         // Si hay UUID y se pudo crear la reparación, mover archivos
@@ -152,16 +166,18 @@ class DeviceRepairController extends Controller
         $data = $request->validated();
 
         $repair->update([
-            'repair_code' => $data['repair_code'] ?? $repair->repair_code,
             'client_id' => $data['client_id'] ?? $repair->client_id,
             'technician_id' => $data['technician_id'] ?? $repair->technician_id,
+            'device_type' => $data['device_type'] ?? $repair->device_type,
+            'device_lock' => $data['device_lock'] ?? $repair->device_lock,
             'device_description' => $data['device_description'] ?? $repair->device_description,
             'fault_description' => $data['fault_description'] ?? $repair->fault_description,
             'status' => $data['status'] ?? $repair->status,
             'total_amount' => $data['total_amount'] ?? $repair->total_amount,
-            'receipt_number' => $data['receipt_number'] ?? $repair->receipt_number,
+            'advance_amount' => isset($data['advance_amount']) ? $data['advance_amount'] : $repair->advance_amount,
             'repair_notes' => $data['repair_notes'] ?? $repair->repair_notes,
             'images' => isset($data['images']) ? (is_array($data['images']) ? $data['images'] : $repair->images) : $repair->images,
+            'tools_used' => isset($data['tools_used']) && is_array($data['tools_used']) ? $data['tools_used'] : $repair->tools_used,
             'delivered_at' => $data['delivered_at'] ?? $repair->delivered_at,
         ]);
 

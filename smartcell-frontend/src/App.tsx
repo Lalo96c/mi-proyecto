@@ -1,4 +1,5 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
+import TechniciansPage from './pages/technicians/TechniciansPage';
 import { useEffect, useState } from 'react';
 import { AuthProvider } from './context/AuthProvider';
 import { GuestRoute } from './components/GuestRoute';
@@ -125,6 +126,14 @@ export default function App() {
                 }
               />
               <Route path="soporte" element={<SoportePage />} />
+              <Route
+                path="tecnicos"
+                element={
+                  <ProtectedRoute>
+                    <TechniciansPage />
+                  </ProtectedRoute>
+                }
+              />
             </Route>
             <Route
               path="/login"
